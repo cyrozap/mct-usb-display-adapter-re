@@ -35,7 +35,7 @@ adapters that use them.
 See [Notes.md](doc/Notes.md).
 
 
-[mct]: http://mct.com.tw/
+[mct]: https://mct.com.tw/
 [pyusb]: https://github.com/pyusb/pyusb
 [ksc]: https://github.com/kaitai-io/kaitai_struct_compiler
 [kspr]: https://github.com/kaitai-io/kaitai_struct_python_runtime
