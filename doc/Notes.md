@@ -56,8 +56,8 @@ Used in:
          wLength) bytes.
    * 0x40, 0xc8: Set 32-bit register value?
      * wIndex: Register address?
-   * 0xc0, 0x91: Unknown.
-     * wValue: Unknown.
+   * 0xc0, 0x91: Keepalive (keep the display output active).
+     * wValue: 0x0002
    * 0xc0, 0xa1: Get chip info?
      * wLength: 512
    * 0xc0, 0xa4: Get array of video modes supported by the chip.

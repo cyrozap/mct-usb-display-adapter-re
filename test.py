@@ -118,7 +118,7 @@ def main():
         print("Done!")
         print()
 
-    # Poll every 2 seconds for... something.
+    # Send keepalive command every 2 seconds.
     while True:
         print(bytes(dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)).hex())
         time.sleep(2)
