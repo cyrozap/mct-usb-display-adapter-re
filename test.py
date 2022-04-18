@@ -134,6 +134,7 @@ def main():
 
     # Send images to the display.
     print("Running color cycle...")
+    last_keepalive = time.monotonic_ns()
     state = "IG"
     red = 255
     green = 0
@@ -147,8 +148,11 @@ def main():
         # Write image data.
         dev.write(1, bulk_data)
 
-        # Send keepalive command.
-        dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
+        current_keepalive = time.monotonic_ns()
+        if current_keepalive - last_keepalive > 1e9:
+            # Send keepalive command.
+            dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
+            last_keepalive = current_keepalive
 
         # State machine for cycling through the hue.
         if state == "IG":
