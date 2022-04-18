@@ -12,6 +12,9 @@ CONTROL_OUT = usb.util.CTRL_OUT | usb.util.CTRL_TYPE_VENDOR | usb.util.CTRL_RECI
 CONTROL_IN = usb.util.CTRL_IN | usb.util.CTRL_TYPE_VENDOR | usb.util.CTRL_RECIPIENT_DEVICE
 
 
+def checksum(data : bytes):
+    return (-sum(data)) & 0xff
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--memory-dump-file", type=str, default="", help="If set, device memory will be dumped to the file named by this argument.")
@@ -118,12 +121,60 @@ def main():
         print("Done!")
         print()
 
-    # Send keepalive command every 2 seconds.
+    # Clear the image FIFO.
+    payload = bytes(struct.pack('<I', (0 << 16) | (0 << 8) | 0)[:3] * width * height)
+    header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12), 0, 0, width, height, len(payload), 0x01, 0, 0)
+    header += bytes([checksum(header)])
+    bulk_data = header + payload
+    for _ in range(3):
+        # Write image data.
+        dev.write(1, bulk_data)
+        # Send keepalive command.
+        dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
+
+    # Send images to the display.
+    print("Running color cycle...")
+    state = "IG"
+    red = 255
+    green = 0
+    blue = 0
     while True:
-        print(bytes(dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)).hex())
-        time.sleep(2)
-        break
-    print()
+        payload = bytes(struct.pack('<I', (red << 16) | (green << 8) | blue)[:3] * width * height)
+        header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12), 0, 0, width, height, len(payload), 0x01, 0, 0)
+        header += bytes([checksum(header)])
+        bulk_data = header + payload
+
+        # Write image data.
+        dev.write(1, bulk_data)
+
+        # Send keepalive command.
+        dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
+
+        # State machine for cycling through the hue.
+        if state == "IG":
+            green += 1
+            if green == 255:
+                state = "DR"
+        elif state == "DR":
+            red -= 1
+            if not red:
+                state = "IB"
+        elif state == "IB":
+            blue += 1
+            if blue == 255:
+                state = "DG"
+        elif state == "DG":
+            green -= 1
+            if not green:
+                state = "IR"
+        elif state == "IR":
+            red += 1
+            if red == 255:
+                state = "DB"
+        else:
+            blue -= 1
+            if not blue:
+                state = "IG"
 
 
 if __name__ == "__main__":
