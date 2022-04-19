@@ -31,6 +31,8 @@ Used in:
 ## Protocol
 
  * Big-endian values, usually, but not always.
+ * Pixel positions and offsets are measured from the top left corner of the
+   screen/image, and images are scanned out left-to-right, top-to-bottom.
  * USB control endpoint commands (0xXX, 0xYY: bmRequestType, bRequest):
    * 0x40, 0xc3: Set video mode/timings.
      * wValue: Index into the supported video modes array.
