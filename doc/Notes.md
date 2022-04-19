@@ -54,8 +54,9 @@ Used in:
      * wLength: Number of bytes, always 4.
        * Writing fewer than 4 bytes results in the corruption of the next (4 -
          wLength) bytes.
-   * 0x40, 0xc8: Set 32-bit register value?
-     * wIndex: Register address?
+   * 0x40, 0xc8: Set cursor position.
+     * wValue: X-position, in pixels.
+     * wIndex: Y-position, in pixels.
    * 0xc0, 0x91: Keepalive (keep the display output active).
      * wValue: 0x0002
    * 0xc0, 0xa1: Get chip info?
