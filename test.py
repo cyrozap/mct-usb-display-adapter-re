@@ -104,9 +104,8 @@ def main():
     print(bytes(dev.ctrl_transfer(CONTROL_IN, 0xa5, 0, 0xec34, 4)).hex())
     print()
 
-    # Set register value? But not really...
-    value = bytes.fromhex('01000000')
-    dev.ctrl_transfer(CONTROL_OUT, 0xc8, 0, 0xe868, value)
+    # Disable cursor.
+    dev.ctrl_transfer(CONTROL_OUT, 0xc4, 0, 0xe868, struct.pack('<I', 0x00000001))
 
     if args.memory_dump_file:
         print("Dumping memory...")
