@@ -15,55 +15,38 @@ seq:
     type: u4
   - id: ic
     type: u4
-  - id: fw_start
-    type: u4
-  - id: fw_len
-    type: u4
-  - id: uhal_start
-    type: u4
-  - id: unk8
-    type: u4
-  - id: unk9
-    type: u4
-  - id: disp_start
-    type: u4
-  - id: unk11
-    type: u4
-  - id: aud_start
-    type: u4
-  - id: unk13
-    type: u4
-  - id: gpio_start
-    type: u4
-  - id: unk15
-    type: u4
-  - id: unk16
-    type: u4
-  - id: unk17
-    type: u4
-  - id: unk18
-    type: u4
-  - id: unk19
+  - id: firmware
+    type: firmware
+  - id: configs
+    type: config_ptr
+    repeat: expr
+    repeat-expr: 12
+  - id: unk4
     type: strz
-    size: 0xb0
+    size: 16
     encoding: ASCII
-instances:
-  uhal:
-    pos: uhal_start
-    type: config
-  disp:
-    pos: disp_start
-    type: config
-  aud:
-    pos: aud_start
-    type: config
-  gpio:
-    pos: gpio_start
-    type: config
-  fw:
-    pos: fw_start
-    size: fw_len
+  - id: unk5
+    type: u4
 types:
+  firmware:
+    seq:
+      - id: offset
+        type: u4
+      - id: len
+        type: u4
+    instances:
+      data:
+        pos: offset
+        size: len
+  config_ptr:
+    seq:
+      - id: offset
+        type: u4
+    instances:
+      config:
+        pos: offset
+        type: config
+        if: 'offset != 0'
   config:
     seq:
       - id: type
@@ -80,9 +63,9 @@ types:
           switch-on: type
           cases:
             '"UHAL"': uhal
-            # '"DISP"': disp
-            # '"AUD_"': aud
-            # '"GPIO"': gpio
+            '"DISP"': disp
+            '"AUD_"': aud
+            '"GPIO"': gpio
   uhal:
     seq:
       - id: unk0
@@ -158,3 +141,63 @@ types:
                 size-eos: true
                 type: str
                 encoding: "UTF-16LE"
+  disp:
+    seq:
+      - id: vid
+        type: u2
+      - id: pid
+        type: u2
+      - id: desc
+        size: 0x40
+        type: str
+        encoding: "UTF-16LE"
+  aud:
+    seq:
+      - id: vid
+        type: u2
+      - id: pid
+        type: u2
+      - id: desc
+        size: 0x40
+        type: str
+        encoding: "UTF-16LE"
+  gpio:
+    seq:
+      - id: unk0
+        type: u4
+      - id: unk1
+        type: u4
+      - id: unk2
+        type: u4
+      - id: unk3
+        type: u4
+      - id: unk4
+        type: u4
+      - id: unk5
+        type: u4
+      - id: unk6
+        type: u4
+      - id: unk7
+        type: u4
+      - id: unk8
+        type: u4
+      - id: unk9
+        type: u4
+      - id: unk10
+        type: u2
+      - id: unk11
+        type: u2
+      - id: unk12
+        type: u4
+      - id: unk13
+        type: u2
+      - id: unk14
+        type: u2
+      - id: unk15
+        type: u4
+      - id: unk16
+        type: u4
+      - id: unk17
+        type: u4
+      - id: unk18
+        type: u4
