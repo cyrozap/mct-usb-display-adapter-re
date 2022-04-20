@@ -133,6 +133,39 @@ def main():
     # Send keepalive command.
     dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
 
+    # Upload cursor image. Cursor pixel format is BGRA32, not RGBA32.
+    c_width = 64
+    c_height = c_width
+    c_x = (width-c_width)//2
+    c_y = (height-c_height)//2
+    payload = b''
+    for j in range(c_height):
+        for i in range(c_width):
+            if i < c_width // 2:
+                if i >= c_width // 4 and i < (3 * c_width) // 4 and j >= c_height // 4 and j < (3 * c_height) // 4:
+                    # Red
+                    payload += struct.pack('<I', (0xff//2 << 24) | (0xff << 16) | (0 << 8) | 0)
+                else:
+                    # Black
+                    payload += struct.pack('<I', (0xff << 24) | (0 << 16) | (0 << 8) | 0)
+            else:
+                if i >= c_width // 4 and i < (3 * c_width) // 4 and j >= c_height // 4 and j < (3 * c_height) // 4:
+                    # Blue
+                    payload += struct.pack('<I', (0xff//2 << 24) | (0 << 16) | (0 << 8) | 0xff)
+                else:
+                    # White
+                    payload += struct.pack('<I', (0xff << 24) | (0xff << 16) | (0xff << 8) | 0xff)
+    header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (1 << 13) | (0 << 12) | 0, c_x, c_y, c_width, c_height, len(payload), 0x01, 1 << 4, 0)
+    header += bytes([checksum(header)])
+    bulk_data = header + payload
+    dev.write(1, bulk_data)
+
+    # Enable cursor.
+    header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (1 << 13) | (0 << 12) | 1, c_x, c_y, c_width, c_height, 3 << 28, 0x01, 0x00, 0)
+    header += bytes([checksum(header)])
+    bulk_data = header
+    dev.write(1, bulk_data)
+
     # Send images to the display.
     print("Running color cycle...")
     last_keepalive = time.monotonic_ns()
@@ -141,7 +174,12 @@ def main():
     red = 255
     green = 0
     blue = 0
+    speed = 5
+    dx = speed
+    dy = speed
     while True:
+        dev.ctrl_transfer(CONTROL_OUT, 0xc8, c_x, c_y)
+
         payload = bytes(struct.pack('<I', (red << 16) | (green << 8) | blue)[:3] * width * height)
         header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12) | counter, 0, 0, width, height, len(payload), 0x01, 0, 0)
         header += bytes([checksum(header)])
@@ -181,6 +219,13 @@ def main():
             blue -= 1
             if not blue:
                 state = "IG"
+
+        if c_x <= 0 or c_x >= width-c_width:
+            dx = -dx
+        if c_y <= 0 or c_y >= height-c_height:
+            dy = -dy
+        c_x += dx
+        c_y += dy
 
         counter += 1
         counter &= 0xfff
