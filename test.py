@@ -123,25 +123,27 @@ def main():
 
     # Clear the image FIFO.
     payload = bytes(struct.pack('<I', (0 << 16) | (0 << 8) | 0)[:3] * width * height)
-    header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12), 0, 0, width, height, len(payload), 0x01, 0, 0)
-    header += bytes([checksum(header)])
-    bulk_data = header + payload
-    for _ in range(3):
+    for counter in range(3):
         # Write image data.
+        header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12) | counter, 0, 0, width, height, len(payload), 0x01, 0, 0)
+        header += bytes([checksum(header)])
+        bulk_data = header + payload
         dev.write(1, bulk_data)
-        # Send keepalive command.
-        dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
+
+    # Send keepalive command.
+    dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
 
     # Send images to the display.
     print("Running color cycle...")
     last_keepalive = time.monotonic_ns()
+    counter = 0
     state = "IG"
     red = 255
     green = 0
     blue = 0
     while True:
         payload = bytes(struct.pack('<I', (red << 16) | (green << 8) | blue)[:3] * width * height)
-        header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12), 0, 0, width, height, len(payload), 0x01, 0, 0)
+        header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12) | counter, 0, 0, width, height, len(payload), 0x01, 0, 0)
         header += bytes([checksum(header)])
         bulk_data = header + payload
 
@@ -179,6 +181,9 @@ def main():
             blue -= 1
             if not blue:
                 state = "IG"
+
+        counter += 1
+        counter &= 0xfff
 
 
 if __name__ == "__main__":
