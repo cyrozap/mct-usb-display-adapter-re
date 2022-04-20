@@ -94,6 +94,11 @@ Used in:
    * Image data is compressed with an unknown algorithm.
 
 
+### Trigger 6
+
+TODO
+
+
 [usb32hdes]: https://www.startech.com/en-us/audio-video-products/usb32hdes
 [usb32dpes2]: https://www.startech.com/en-us/audio-video-products/usb32dpes2
 [usb32hd2]: https://www.startech.com/en-us/audio-video-products/usb32hd2
