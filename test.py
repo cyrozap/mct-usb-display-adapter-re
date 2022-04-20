@@ -151,7 +151,7 @@ def main():
         dev.write(1, bulk_data)
 
         current_keepalive = time.monotonic_ns()
-        if current_keepalive - last_keepalive > 1e9:
+        if current_keepalive - last_keepalive > 2e9:
             # Send keepalive command.
             dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
             last_keepalive = current_keepalive
