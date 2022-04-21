@@ -26,7 +26,7 @@ adapters that use them.
 ### Procedure
 
 1. Install dependencies.
-2. Use `./test.py` to replay some packets to the dongle. This is
+2. Use `./test_t5.py` to replay some packets to the Trigger 5 dongle. This is
    work-in-progress research code and doesn't do much yet.
 
 
