@@ -91,7 +91,11 @@ Used in:
  * USB bulk endpoint:
    * Seems to be used exclusively for sequences of display/data transfer
      commands.
-   * Image data is compressed with an unknown algorithm.
+   * Image data is compressed with an algorithm similar to JPEG.
+     * Compressed output shows signs of DCT and blocking artifacts.
+     * Blocks are 8x8 pixels.
+     * Probably JPEG with a non-standard data encoding (no quantization or
+       Huffman tables in the transmitted data).
 
 
 ### Trigger 6
