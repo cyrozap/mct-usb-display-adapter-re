@@ -74,7 +74,7 @@ Used in:
      * Memory is byte-addressable, but reads will wrap at the word boundary.
        * e.g., if register 0xABCD is set to 0x12345678 (big-endian), and a
          4-byte read at 0xABD0 (0xABCD + 3) is performed, the data read back
-	 will be 0x78123456 (big-endian).
+         will be 0x78123456 (big-endian).
    * 0xc0, 0xa6: Check if monitor is connected (HPD).
      * wValue: 0xff, unknown.
      * wIndex: 3, unknown.
