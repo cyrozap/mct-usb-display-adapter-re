@@ -33,7 +33,7 @@ Used in:
 
 ### Trigger 5
 
- * Big-endian values, usually, but not always.
+ * Values are sometimes little-endian, other times big-endian.
  * Pixel positions and offsets are measured from the top left corner of the
    screen/image, and images are scanned out left-to-right, top-to-bottom.
  * USB control endpoint commands (0xXX, 0xYY: bmRequestType, bRequest):
