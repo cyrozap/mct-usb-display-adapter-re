@@ -39,21 +39,21 @@ Used in:
  * USB control endpoint commands (0xXX, 0xYY: bmRequestType, bRequest):
    * 0x40, 0xc3: Set video mode/timings.
      * wValue: Index into the supported video modes array.
-     * >H: Vertical resolution.
-     * >H: Horizontal resolution.
-     * >H: Line total pixels minus one.
-     * >H: Line sync pulse minus one.
-     * >H: Line back porch minus one.
-     * >H: 255
-     * >H: 255
-     * >H: Horizontal resolution minus one.
-     * >H: Frame total lines minus one.
-     * >H: Frame sync pulse minus one.
-     * >H: Frame back porch minus one.
-     * >H: 255
-     * >H: 255
-     * >H: Vertical resolution minus one.
-     * 7B: Unknown, maybe something to do with the pixel clock frequency?
+     * `>H`: Vertical resolution.
+     * `>H`: Horizontal resolution.
+     * `>H`: Line total pixels minus one.
+     * `>H`: Line sync pulse minus one.
+     * `>H`: Line back porch minus one.
+     * `>H`: 255
+     * `>H`: 255
+     * `>H`: Horizontal resolution minus one.
+     * `>H`: Frame total lines minus one.
+     * `>H`: Frame sync pulse minus one.
+     * `>H`: Frame back porch minus one.
+     * `>H`: 255
+     * `>H`: 255
+     * `>H`: Vertical resolution minus one.
+     * `7B`: Unknown, maybe something to do with the pixel clock frequency?
    * 0x40, 0xc4: Set 32-bit register value.
      * wIndex: Register address, aligned to 32-bit words (divisible by 4).
      * wLength: Number of bytes, always 4.
@@ -97,9 +97,9 @@ Used in:
      * Probably JPEG with a non-standard data encoding (no quantization or
        Huffman tables in the transmitted data).
    * Packet format:
-     * B: Magic number identifying the start of the packet header: 0xfb
-     * B: Header length, always 20 (0x14).
-     * <H: Frame counter and packet flags.
+     * `B`: Magic number identifying the start of the packet header: 0xfb
+     * `B`: Header length, always 20 (0x14).
+     * `<H`: Frame counter and packet flags.
        * Lower 12 bits: Frame counter. Increment by 1 for each frame to be
          displayed.
        * Upper 4 bits: Packet flags.
@@ -108,28 +108,28 @@ Used in:
            * 0: 24-bit
            * 1: 32-bit
            * 2: 16-bit
-     * <H: Horizontal pixel offset info.
+     * `<H`: Horizontal pixel offset info.
        * Lower 13 bits: Horizontal pixel offset.
        * Upper 3 bits: Unknown.
-     * <H: Vertical pixel offset info.
+     * `<H`: Vertical pixel offset info.
        * Lower 13 bits: Vertical pixel offset.
        * Upper 3 bits: Unknown.
-     * <H: Width info.
+     * `<H`: Width info.
        * Lower 13 bits: Frame pixel width.
        * Upper 3 bits: Unknown.
-     * <H: Height info.
+     * `<H`: Height info.
        * Lower 13 bits: Frame pixel height.
        * Upper 3 bits: Unknown.
-     * <I: Payload info.
+     * `<I`: Payload info.
        * Lower 28 bits: The length of the payload in bytes.
        * Upper 4 bits: Flags.
          * 0x3: Enable cursor.
          * 0x5: Disable cursor.
-     * B: Other flags.
+     * `B`: Other flags.
        * Bit 0: Unknown, must be set.
-     * B: Unknown.
-     * B: Unknown.
-     * B: Header checksum.
+     * `B`: Unknown.
+     * `B`: Unknown.
+     * `B`: Header checksum.
        * To calculate the checksum, simply sum all the previous bytes (starting
          with the Magic), then negate that sum and take the lowest 8 bits.
      * N bytes: Packet payload.
