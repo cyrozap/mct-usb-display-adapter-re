@@ -96,6 +96,44 @@ Used in:
      * Blocks are 8x8 pixels.
      * Probably JPEG with a non-standard data encoding (no quantization or
        Huffman tables in the transmitted data).
+   * Packet format:
+     * B: Magic number identifying the start of the packet header: 0xfb
+     * B: Header length, always 20 (0x14).
+     * <H: Frame counter and packet flags.
+       * Lower 12 bits: Frame counter. Increment by 1 for each frame to be
+         displayed.
+       * Upper 4 bits: Packet flags.
+         * Bit 0: Compression enabled.
+         * Bits 1-2: Bit depth.
+           * 0: 24-bit
+           * 1: 32-bit
+           * 2: 16-bit
+     * <H: Horizontal pixel offset info.
+       * Lower 13 bits: Horizontal pixel offset.
+       * Upper 3 bits: Unknown.
+     * <H: Vertical pixel offset info.
+       * Lower 13 bits: Vertical pixel offset.
+       * Upper 3 bits: Unknown.
+     * <H: Width info.
+       * Lower 13 bits: Frame pixel width.
+       * Upper 3 bits: Unknown.
+     * <H: Height info.
+       * Lower 13 bits: Frame pixel height.
+       * Upper 3 bits: Unknown.
+     * <I: Payload info.
+       * Lower 28 bits: The length of the payload in bytes.
+       * Upper 4 bits: Flags.
+         * 0x3: Enable cursor.
+         * 0x5: Disable cursor.
+     * B: Other flags.
+       * Bit 0: Unknown, must be set.
+     * B: Unknown.
+     * B: Unknown.
+     * B: Header checksum.
+       * To calculate the checksum, simply sum all the previous bytes (starting
+         with the Magic), then negate that sum and take the lowest 8 bits.
+     * N bytes: Packet payload.
+       * The length and data format of this payload are specified in the header.
 
 
 ### Trigger 6
