@@ -13,7 +13,7 @@ adapters that use them.
 
 ## Reverse engineering notes
 
-See [Notes.md](doc/Notes.md).
+See [doc/Notes.md](doc/Notes.md).
 
 
 ## Quick start
