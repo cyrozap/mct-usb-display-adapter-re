@@ -53,8 +53,8 @@
      * wIndex: 3, unknown.
      * Returns 1 if connected, 0 otherwise (16-bit value).
    * 0xc0, 0xa7: Get RAM size in kilobits?
-   * 0xc0, 0xa8: Get 128-byte EDID page.
-     * wValue: Page index.
+   * 0xc0, 0xa8: Get 128-byte EDID block.
+     * wValue: Block number.
      * wLength: 128
      * Data only valid if monitor connected--otherwise just sends 128 bytes of
        data that were left in the USB buffer.

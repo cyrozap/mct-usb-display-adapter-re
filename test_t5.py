@@ -59,7 +59,7 @@ def main():
     print()
 
     for i in range(4):
-        # EDID page read
+        # EDID block read
         start = time.perf_counter_ns()
         edid_block = dev.ctrl_transfer(CONTROL_IN, 0xa8, i, 0, 128)
         stop = time.perf_counter_ns()
