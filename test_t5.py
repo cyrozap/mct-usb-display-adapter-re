@@ -60,7 +60,10 @@ def main():
 
     for i in range(4):
         # EDID page read
-        print(bytes(dev.ctrl_transfer(CONTROL_IN, 0xa8, i, 0, 128)).hex())
+        start = time.perf_counter_ns()
+        edid_block = dev.ctrl_transfer(CONTROL_IN, 0xa8, i, 0, 128)
+        stop = time.perf_counter_ns()
+        print(bytes(edid_block).hex(), "({:.06f} seconds)".format((stop-start)/1e9))
     print()
 
     # Firmware reset.
