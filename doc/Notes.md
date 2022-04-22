@@ -1,33 +1,6 @@
 # Reverse engineering notes
 
 
-## General info
-
-Used in:
- * [StarTech USB32HDES][usb32hdes] / [j5create JUA254/JUA255][jua254]
-   * MCT Trigger 5 T5-302
-   * 16 MB RAM
-   * HDMI output
-     * 1080p60
- * [StarTech USB32DPES2][usb32dpes2]
-   * MCT Trigger VI T6-688L
-   * 64 MB RAM
-   * DP output
-     * 4k30
- * [StarTech USB32HD2][usb32hd2] / j5create [JUA365][jua365]/[JCA365][jca365]
-   * MCT Trigger VI T6-688SL
-   * 64 MB RAM
-   * Silicon Image Sil9136-3
-   * Dual HDMI outputs
-     * 1x 4k30
-     * 1x 1080p60
- * StarTech [USB32HD4][usb32hd4]/[USBC2HD4][usbc2hd4] / [j5create JCA366][jca366]
-   * MCT Trigger VI T6-688SL
-   * ITE IT66121
-   * Quad HDMI outputs
-     * 4x 1080p60
-
-
 ## Protocol
 
 
@@ -139,14 +112,3 @@ Used in:
 ### Trigger 6
 
 TODO
-
-
-[usb32hdes]: https://www.startech.com/en-us/audio-video-products/usb32hdes
-[usb32dpes2]: https://www.startech.com/en-us/audio-video-products/usb32dpes2
-[usb32hd2]: https://www.startech.com/en-us/audio-video-products/usb32hd2
-[usb32hd4]: https://www.startech.com/en-us/audio-video-products/usb32hd4
-[usbc2hd4]: https://www.startech.com/en-us/audio-video-products/usbc2hd4
-[jua254]: https://en.j5create.com/products/jua254
-[jua365]: https://en.j5create.com/products/jua365
-[jca365]: https://en.j5create.com/products/jca365
-[jca366]: https://en.j5create.com/products/jca366
