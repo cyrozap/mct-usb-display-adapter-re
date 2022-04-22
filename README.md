@@ -11,6 +11,11 @@ these chips use so a Linux driver can be written to support them and the display
 adapters that use them.
 
 
+## Reverse engineering notes
+
+See [Notes.md](doc/Notes.md).
+
+
 ## Quick start
 
 
@@ -28,11 +33,6 @@ adapters that use them.
 1. Install dependencies.
 2. Use `./test_t5.py` to replay some packets to the Trigger 5 dongle. This is
    work-in-progress research code and doesn't do much yet.
-
-
-## Reverse engineering notes
-
-See [Notes.md](doc/Notes.md).
 
 
 ## Hardware info
