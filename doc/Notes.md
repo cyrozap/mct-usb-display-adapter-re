@@ -27,10 +27,10 @@
      * `>H`: 255
      * `>H`: Vertical resolution minus one.
      * `5B`: Unknown, maybe something to do with the pixel clock frequency?
-     * `B`: H/V sync polarity (not sure which).
+     * `B`: Horizontal sync polarity.
        * 0: Positive
        * 1: Negative.
-     * `B`: H/V sync polarity (not sure which).
+     * `B`: Vertical sync polarity.
        * 0: Positive
        * 1: Negative.
    * 0x40, 0xc4: Set 32-bit register value.
