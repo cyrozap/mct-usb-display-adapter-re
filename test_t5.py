@@ -49,7 +49,7 @@ def main():
     for i in range(modes_count):
         element = modes[4+8*i:4+8*(i+1)]
         refresh_rate, pixel_clk, bit_depth, index, height, width = struct.unpack('<BBBBHH', element)
-        print("  {}: Mode {:>2}: {:>4} x {:>4} x {:>2} bits @ {:>3} fps, {:>3} Hz pixel clock".format(
+        print("  {}: Mode {:>2}: {:>4} x {:>4} x {:>2} bits @ {:>3} fps, {:>3} MHz pixel clock".format(
             element.hex(), index, width, height, bit_depth, refresh_rate, pixel_clk))
     print()
 
