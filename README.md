@@ -40,7 +40,7 @@ See [doc/Notes.md](doc/Notes.md).
 
 ### Trigger 5 devices
 
- * [StarTech USB32HDES][usb32hdes] / [j5create JUA254/JUA255][jua254]
+ * [StarTech USB32HDES][usb32hdes]
    * MCT Trigger 5 T5-302
    * 16 MB RAM
    * HDMI output
@@ -49,6 +49,9 @@ See [doc/Notes.md](doc/Notes.md).
 
 ### Trigger VI (Trigger 6) devices
 
+ * [j5create JUA254/JUA255][jua254]
+   * HDMI output
+     * 1080p60
  * [StarTech USB32DPES2][usb32dpes2]
    * MCT Trigger VI T6-688L
    * 64 MB RAM
