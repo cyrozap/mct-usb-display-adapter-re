@@ -40,6 +40,11 @@ See [doc/Notes.md](doc/Notes.md).
 
 ### Trigger 5 devices
 
+ * [StarTech USB32VGAES][usb32vgaes]
+   * MCT Trigger 5 T5-302
+   * 16 MB RAM
+   * VGA output
+     * 1080p60
  * [StarTech USB32HDES][usb32hdes]
    * MCT Trigger 5 T5-302
    * 16 MB RAM
@@ -75,6 +80,7 @@ See [doc/Notes.md](doc/Notes.md).
 [pyusb]: https://github.com/pyusb/pyusb
 [ksc]: https://github.com/kaitai-io/kaitai_struct_compiler
 [kspr]: https://github.com/kaitai-io/kaitai_struct_python_runtime
+[usb32vgaes]: https://www.startech.com/en-us/audio-video-products/usb32vgaes
 [usb32hdes]: https://www.startech.com/en-us/audio-video-products/usb32hdes
 [usb32dpes2]: https://www.startech.com/en-us/audio-video-products/usb32dpes2
 [usb32hd2]: https://www.startech.com/en-us/audio-video-products/usb32hd2
