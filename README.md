@@ -54,7 +54,7 @@ See [doc/Notes.md](doc/Notes.md).
 
 ### Trigger VI (Trigger 6) devices
 
- * [j5create JUA254/JUA255][jua254]
+ * [StarTech USB32HDES (Rev 2)][usb32hdes] / [j5create JUA254/JUA255][jua254]
    * HDMI output
      * 1080p60
  * [StarTech USB32DPES2][usb32dpes2]
