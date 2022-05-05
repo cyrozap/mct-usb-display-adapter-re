@@ -235,6 +235,61 @@ types:
         size: 0x40
         type: str
         encoding: "UTF-16LE"
+      - id: unk0
+        type: u4
+      - id: unk1
+        type: u4
+      - id: unk2
+        type: u4
+      - id: unk3
+        type: u4
+      - id: unk4
+        size: 16
+      - id: modes
+        size: 32
+        type: mode
+        repeat: eos
+    enums:
+      sync_polarity:
+        0: negative
+        1: positive
+    types:
+      mode:
+        seq:
+          - id: pixel_clock_khz
+            type: u4
+          - id: refresh_rate_hz
+            type: u2
+          - id: line_total_pixels
+            type: u2
+          - id: line_active_pixels
+            type: u2
+          - id: line_active_plus_front_porch_pixels
+            type: u2
+          - id: line_sync_width
+            type: u2
+          - id: frame_total_pixels
+            type: u2
+          - id: frame_active_pixels
+            type: u2
+          - id: frame_active_plus_front_porch_pixels
+            type: u2
+          - id: frame_sync_width
+            type: u2
+          - id: unk8
+            type: u2
+          - id: unk9
+            type: u2
+          - id: unk10
+            type: u2
+          - id: sync_polarity_0
+            type: u1
+            enum: sync_polarity
+          - id: sync_polarity_1
+            type: u1
+            enum: sync_polarity
+          - id: unk11
+            type: u2
   aud:
     seq:
       - id: vid
