@@ -13,7 +13,7 @@ seq:
     type: u4
   - id: unk3
     type: u4
-  - id: ic
+  - id: image_code_version
     type: u4
   - id: firmware
     type: firmware
@@ -21,7 +21,7 @@ seq:
     type: config_ptr
     repeat: expr
     repeat-expr: 12
-  - id: unk4
+  - id: project_code
     type: strz
     size: 16
     encoding: ASCII
