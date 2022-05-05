@@ -68,13 +68,13 @@ types:
             '"GPIO"': gpio
   uhal:
     seq:
-      - id: unk0
+      - id: config_usb2_start
         type: u2
-      - id: unk1
+      - id: config_usb3_start
         type: u2
       - id: binary_object_store_start
         type: u2
-      - id: unk3
+      - id: unk3_start
         type: u2
       - id: manufacturer_start
         type: u2
@@ -87,35 +87,35 @@ types:
       device_usb3:
         pos: 0x40
         type: descriptor
-      unk0_inst:
-        pos: unk0 - 12
-        type: descriptor
-      unk1_inst:
-        pos: unk1 - 12
-        type: descriptor
+      config_usb2:
+        pos: config_usb2_start - 12
+        type: descriptors
+        size: config_usb3_start - config_usb2_start
+      config_usb3:
+        pos: config_usb3_start - 12
+        type: descriptors
+        size: binary_object_store_start - config_usb3_start
       binary_object_store:
         pos: binary_object_store_start - 12
-        type: binary_object_store
+        type: descriptors
+        size: unk3_start - binary_object_store_start
       unk3_inst:
-        pos: unk3 - 12
+        pos: unk3_start - 12
         type: descriptor
+        size: manufacturer_start - unk3_start
       manufacturer:
         pos: manufacturer_start - 12
         type: descriptor
+        size: product_start - manufacturer_start
       product:
         pos: product_start - 12
         type: descriptor
     types:
-      binary_object_store:
+      descriptors:
         seq:
-          - id: b_length
-            type: u1
-          - id: b_descriptor_type
-            type: u1
-          - id: w_total_length
-            type: u2
-          - id: b_num_device_caps
-            type: u1
+          - id: descriptors
+            type: descriptor
+            repeat: eos
       descriptor:
         seq:
           - id: b_length
@@ -123,24 +123,108 @@ types:
           - id: b_descriptor_type
             type: u1
             enum: type
+            if: b_length != 0
           - id: data
             size: b_length - 2
             type:
               switch-on: b_descriptor_type
               cases:
+                type::device: device
+                type::configuration: configuration
                 type::string: string
+                type::interface: interface
+                type::endpoint: endpoint
+                type::binary_object_store: binary_object_store
+            if: b_length != 0
         enums:
           type:
             1: device
             2: configuration
             3: string
+            4: interface
+            5: endpoint
+            15: binary_object_store
+            16: device_capability
+            48: superspeed_usb_endpoint_companion
         types:
+          device:
+            seq:
+              - id: bcd_usb
+                type: u2
+              - id: b_device_class
+                type: u1
+              - id: b_device_sub_class
+                type: u1
+              - id: b_device_protocol
+                type: u1
+              - id: b_max_packet_size
+                type: u1
+              - id: id_vendor
+                type: u2
+              - id: id_product
+                type: u2
+              - id: bcd_device
+                type: u2
+              - id: i_manufacturer
+                type: u1
+              - id: i_product
+                type: u1
+              - id: i_serial_number
+                type: u1
+              - id: b_num_configurations
+                type: u1
+          configuration:
+            seq:
+              - id: w_total_length
+                type: u2
+              - id: b_num_interfaces
+                type: u1
+              - id: b_configuration_value
+                type: u1
+              - id: i_configuration
+                type: u1
+              - id: bm_attributes
+                size: 1
+              - id: b_max_power
+                type: u1
           string:
             seq:
               - id: string
                 size-eos: true
                 type: str
                 encoding: "UTF-16LE"
+          interface:
+            seq:
+              - id: b_interface_number
+                type: u1
+              - id: b_alternate_setting
+                type: u1
+              - id: b_num_endpoints
+                type: u1
+              - id: b_interface_class
+                type: u1
+              - id: b_interface_sub_class
+                type: u1
+              - id: b_interface_protocol
+                type: u1
+              - id: i_interface
+                type: u1
+          endpoint:
+            seq:
+              - id: b_endpoint_address
+                type: u1
+              - id: bm_attributes
+                size: 1
+              - id: w_max_packet_size
+                type: u2
+              - id: b_interval
+                type: u1
+          binary_object_store:
+            seq:
+              - id: w_total_length
+                type: u2
+              - id: b_num_device_caps
+                type: u1
   disp:
     seq:
       - id: vid
