@@ -129,4 +129,109 @@ value, and "0xYY" is the bRequest value.
 
 ### Trigger 6
 
+
+#### USB control endpoint commands
+
+Commands are in the form of "0xXX, 0xYY", where "0xXX" is the bmRequestType
+value, and "0xYY" is the bRequest value.
+
+ * 0x40, 0x03: Unknown.
+   * wIndex: 1
+ * 0x40, 0x12: Set video mode?
+   * wLength: 32
+ * 0x40, 0x23: Unknown.
+   * wLength: 40
+ * 0x40, 0x24: Unknown.
+   * wLength: 16
+ * 0x40, 0x30: Unknown.
+ * 0x40, 0x31: Unknown.
+ * 0xc0, 0x80: Get EDID block.
+   * wValue: Byte offset.
+   * wLength: 128
+ * 0xc0, 0x87: Unknown.
+   * wLength: 1
+ * 0xc0, 0x88: Unknown.
+   * wLength: 1
+ * 0xc0, 0x89: Get array of video modes supported by the chip.
+   * wIndex: Byte offset.
+   * wLength: 512
+ * 0xc0, 0xa1: Unknown.
+   * wIndex: Unknown.
+   * wLength: 16
+ * 0xc0, 0xa2: Unknown.
+   * wLength: 16
+ * 0xc0, 0xa3: Unknown.
+   * wLength: 40
+ * 0xc0, 0xa4: Unknown.
+ * 0xc0, 0xa5: Get audio descriptor?
+   * wLength: 32
+ * 0xc0, 0xb0: Get adapter info field.
+   * wIndex: Field number.
+     * 0: "Hardware Platform" (`<I`).
+     * 1: "Boot Code Version" (`<I`).
+     * 2: "Image Code Version" (`<I`).
+     * 3: "Project Code" (16 byte null-terminated string).
+     * 4: "Vendor Command Version" (`<I`).
+     * 5: "Serial Number" (length 8).
+ * 0xc0, 0xb1: Get adapter session info?
+   * wIndex: Session number.
+     * 0: Video (length 132)?
+     * 3: Audio (length 132)?
+ * 0xc0, 0xb3: Get adapter DISP data?
+   * wLength: 112
+ * 0xc0, 0xb4: Unknown.
+ * 0xc0, 0xcc: Unknown.
+   * wValue: 1
+   * wLength: 104
+
+
+#### USB bulk endpoint
+
+For each chunk of data you want to send to a virtual device ("session"), you
+first send a 32-byte "select session" packet to select what session you want to
+send the following packet to.
+
+So for example, if you want to send 16-bit PCM data to the Audio session (number
+3), you first send a "select session" packet to select session 3 and inform the
+device how much data is being sent to the session, and then in the next packet
+you send the raw PCM data (the length of which was specified in the "select
+session" packet).
+
+ * "Select Session" packet format:
+   * `<I`: Session number.
+     * 0: Video
+     * 3: Audio
+     * 5: Firmware update
+   * `<I`: Data length in bytes.
+   * `<I`: Payload length again, with flags?
+   * `<I`: Payload length again?
+   * `16B`: Null bytes.
+ * Audio session data format:
+   * N bytes: Raw dual-channel 16-bit little-endian PCM data.
+ * Video session packet format:
+   * `<I`: Unknown, always 3.
+   * `<I`: Data length in bytes.
+   * `<I`: Packet counter (starts at 1).
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * `<I`: Unknown.
+   * N bytes: JPEG image file.
+     * Literally a full JPEG file, not just JPEG image data.
+     * Length is specified in the "data length" field of the packet header.
+ * Firmware update session data format:
+   * N bytes: The the entire firmware image file, the format of which is
+     specified in the [Kaitai Struct definition][t6img].
+
+
+#### USB interrupt endpoint
+
 TODO
+
+
+[t6img]: ../mct_t6img.ksy
