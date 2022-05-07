@@ -130,7 +130,12 @@ def main():
         header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (0 << 13) | (0 << 12) | counter, 0, 0, width, height, len(payload), 0x01, 0, 0)
         header += bytes([checksum(header)])
         bulk_data = header + payload
-        dev.write(1, bulk_data)
+        start = time.perf_counter_ns()
+        written = dev.write(1, bulk_data)
+        end = time.perf_counter_ns()
+        duration_ns = end - start
+        print("Wrote {} bytes in {:.06f} seconds ({} Mbps)".format(written, duration_ns/1e9, (written*8*1000)//duration_ns))
+
 
     # Send keepalive command.
     dev.ctrl_transfer(CONTROL_IN, 0x91, 0x0002, 0, 1)
@@ -160,13 +165,21 @@ def main():
     header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (1 << 13) | (0 << 12) | 0, c_x, c_y, c_width, c_height, len(payload), 0x01, 1 << 4, 0)
     header += bytes([checksum(header)])
     bulk_data = header + payload
-    dev.write(1, bulk_data)
+    start = time.perf_counter_ns()
+    written = dev.write(1, bulk_data)
+    end = time.perf_counter_ns()
+    duration_ns = end - start
+    print("Wrote {} bytes in {:.06f} seconds ({} Mbps)".format(written, duration_ns/1e9, (written*8*1000)//duration_ns))
 
     # Enable cursor.
     header = struct.pack('<BBHHHHHIBBB', 0xfb, 0x14, (1 << 13) | (0 << 12) | 1, c_x, c_y, c_width, c_height, 3 << 28, 0x01, 0x00, 0)
     header += bytes([checksum(header)])
     bulk_data = header
-    dev.write(1, bulk_data)
+    start = time.perf_counter_ns()
+    written = dev.write(1, bulk_data)
+    end = time.perf_counter_ns()
+    duration_ns = end - start
+    print("Wrote {} bytes in {:.06f} seconds ({} Mbps)".format(written, duration_ns/1e9, (written*8*1000)//duration_ns))
 
     # Send images to the display.
     print("Running color cycle...")
