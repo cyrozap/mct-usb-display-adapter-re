@@ -56,6 +56,16 @@ value, and "0xYY" is the bRequest value.
    * wLength: 512
  * 0xc0, 0xa4: Get array of video modes supported by the chip.
    * wLength: 420
+   * Return value:
+     * `>H`: Number of modes.
+     * `2B`: Null padding bytes.
+     * Array of N modes, where each mode has the form of:
+       * `B`: Refresh rate in Hz.
+       * `B`: Pixel clock in MHz.
+       * `B`: Bits per pixel.
+       * `B`: Mode number.
+       * `<H`: Width in pixels.
+       * `<H`: Height in pixels.
  * 0xc0, 0xa5: Read internal memory/MMIO registers.
    * wIndex: Memory address.
    * wLength: Number of bytes, 1-4.
