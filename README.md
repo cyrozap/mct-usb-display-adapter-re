@@ -57,6 +57,9 @@ See [doc/Notes.md](doc/Notes.md).
 
 ### Trigger VI (Trigger 6) devices
 
+ * [j5create JUA311][jua311]
+   * VGA output
+     * 1080p60
  * [StarTech USB32HDES (Rev 2)][usb32hdes] / [j5create JUA254/JUA255][jua254]
    * HDMI output
      * 1080p60
@@ -90,6 +93,7 @@ See [doc/Notes.md](doc/Notes.md).
 [usb32hd4]: https://www.startech.com/en-us/audio-video-products/usb32hd4
 [usbc2hd4]: https://www.startech.com/en-us/audio-video-products/usbc2hd4
 [jua254]: https://en.j5create.com/products/jua254
+[jua311]: https://en.j5create.com/products/jua311
 [jua350]: https://en.j5create.com/products/jua350
 [jua365]: https://en.j5create.com/products/jua365
 [jca365]: https://en.j5create.com/products/jca365
