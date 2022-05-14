@@ -50,6 +50,9 @@ See [doc/Notes.md](doc/Notes.md).
    * 16 MB RAM
    * HDMI output
      * 1080p60
+ * [j5create JUA310][jua310]
+   * VGA output
+     * 1080p60
  * [j5create JUA350][jua350]
    * HDMI output
      * 1080p60
@@ -98,6 +101,7 @@ See [doc/Notes.md](doc/Notes.md).
 [usb32hd4]: https://www.startech.com/en-us/audio-video-products/usb32hd4
 [usbc2hd4]: https://www.startech.com/en-us/audio-video-products/usbc2hd4
 [jua254]: https://en.j5create.com/products/jua254
+[jua310]: https://en.j5create.com/products/jua310
 [jua311]: https://en.j5create.com/products/jua311
 [jua350]: https://en.j5create.com/products/jua350
 [jua365]: https://en.j5create.com/products/jua365
