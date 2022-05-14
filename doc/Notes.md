@@ -93,7 +93,9 @@ value, and "0xYY" is the bRequest value.
    * wValue: 0xff, unknown.
    * wIndex: 3, unknown.
    * Returns 1 if connected, 0 otherwise (16-bit value).
- * 0xc0, 0xa7: Get RAM size in kilobits?
+ * 0xc0, 0xa7: Get some flags?
+   * wLength: 4
+   * Returns 32-bit little-endian integer.
  * 0xc0, 0xa8: Get 128-byte EDID block.
    * wValue: Block number.
    * wLength: 128
