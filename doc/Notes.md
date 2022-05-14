@@ -1,6 +1,14 @@
 # Reverse engineering notes
 
 
+## Prior reverse engineering/driver development efforts
+
+ * [DC11011100/jua365-driver: Reverse Engineering Effort for JUA365 (2x HDMI-to-USB 3.0 Adapter)][jua365-driver]
+   * Unfortunately, the repo was taken offline at some point, and the Internet
+     Archive only captured the landing page and not any of the source code or
+     capture files.
+
+
 ## Protocol
 
 
@@ -244,4 +252,5 @@ session" packet).
 TODO
 
 
+[jua365-driver]: https://web.archive.org/web/20210328021458/https://github.com/DC11011100/jua365-driver
 [t6img]: ../mct_t6img.ksy
