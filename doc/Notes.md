@@ -60,8 +60,16 @@ value, and "0xYY" is the bRequest value.
    * wIndex: Y-position, in pixels.
  * 0xc0, 0x91: Keepalive (keep the display output active).
    * wValue: 0x0002
- * 0xc0, 0xa1: Get chip info?
+ * 0xc0, 0xa1: Get firmware info?
    * wLength: 512
+   * Return value:
+     * `B`: Version major?
+     * `B`: Version minor?
+     * `B`: Version patch?
+     * `8B`: Unknown.
+     * `B`: Year, starting at 2000.
+     * `B`: Month.
+     * `B`: Day.
  * 0xc0, 0xa4: Get array of video modes supported by the chip.
    * wLength: 420
    * Return value:
