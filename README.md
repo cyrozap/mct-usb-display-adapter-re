@@ -68,6 +68,11 @@ See [doc/Notes.md](doc/Notes.md).
    * 64 MB RAM
    * DP output
      * 4k30
+ * [j5create JCD543][jcd543]
+   * VGA output
+     * 1080p60
+   * HDMI output
+     * 4k30
  * [StarTech USB32HD2][usb32hd2] / j5create [JUA365][jua365]/[JCA365][jca365]
    * MCT Trigger VI T6-688SL
    * 64 MB RAM
@@ -98,3 +103,4 @@ See [doc/Notes.md](doc/Notes.md).
 [jua365]: https://en.j5create.com/products/jua365
 [jca365]: https://en.j5create.com/products/jca365
 [jca366]: https://en.j5create.com/products/jca366
+[jcd543]: https://en.j5create.com/products/jcd543
