@@ -12,6 +12,10 @@ CONTROL_OUT = usb.util.CTRL_OUT | usb.util.CTRL_TYPE_VENDOR | usb.util.CTRL_RECI
 CONTROL_IN = usb.util.CTRL_IN | usb.util.CTRL_TYPE_VENDOR | usb.util.CTRL_RECIPIENT_DEVICE
 
 
+def is_t5(device):
+    if device.idVendor == 0x0711 and device.idProduct in range(0x5800, 0x581f+1):
+        return True
+
 def checksum(data : bytes):
     return (-sum(data)) & 0xff
 
@@ -20,7 +24,7 @@ def main():
     parser.add_argument("-d", "--memory-dump-file", type=str, default="", help="If set, device memory will be dumped to the file named by this argument.")
     args = parser.parse_args()
 
-    dev = usb.core.find(idVendor=0x0711, idProduct=0x5800)
+    dev = usb.core.find(custom_match=is_t5)
     if dev is None:
         raise ValueError('Our device is not connected')
 
