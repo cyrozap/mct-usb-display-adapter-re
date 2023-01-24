@@ -2,6 +2,7 @@ meta:
   id: mct_t6img
   file-extension: t6img
   endian: le
+  license: CC0-1.0
 seq:
   - id: magic
     contents: "IMG_"
