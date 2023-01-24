@@ -93,6 +93,17 @@ See [doc/Notes.md](doc/Notes.md).
      * 4x 1080p60
 
 
+## License
+
+Except where stated otherwise:
+
+* All software in this repository (e.g., testing and experimentation code, etc.)
+  is made available under the [Zero-Clause BSD (0BSD) license][license].
+* All copyrightable content that is not software (e.g., reverse engineering
+  notes, this README file, etc.) is licensed under the
+  [Creative Commons Attribution-ShareAlike 4.0 International License][cc-by-sa].
+
+
 [mct]: https://mct.com.tw/
 [pyusb]: https://github.com/pyusb/pyusb
 [ksc]: https://github.com/kaitai-io/kaitai_struct_compiler
@@ -112,3 +123,5 @@ See [doc/Notes.md](doc/Notes.md).
 [jca365]: https://en.j5create.com/products/jca365
 [jca366]: https://en.j5create.com/products/jca366
 [jcd543]: https://en.j5create.com/products/jcd543
+[license]: LICENSE.txt
+[cc-by-sa]: https://creativecommons.org/licenses/by-sa/4.0/
