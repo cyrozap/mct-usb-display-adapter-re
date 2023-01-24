@@ -44,6 +44,14 @@ value, and "0xYY" is the bRequest value.
    * `>H`: 255
    * `>H`: Vertical resolution minus one.
    * `5B`: Unknown, maybe something to do with the pixel clock frequency?
+     * 01280a1904 (800x600, 1056x628, 40 MHz, hpol-p-vpol-p)
+     * 01291a2904 (1024x768, 1344x806, 65 MHz, hpol-n-vpol-n)
+     * 01270a1e02 (1024x768, 1344x806, 65 MHz, hpol-p-vpol-n)
+     * 012d213204 (1280x720, 1664x748, 74 MHz, hpol-p-vpol-p)
+     * 012d183202 (1280x1024, 1688x1066, 108 MHz, hpol-p-vpol-p)
+     * 0131112302 (1680x1050, 1840x1080, 119 MHz, hpol-n-vpol-p)
+     * 012d243202 (1600x1200, 2160x1250, 162 MHz, hpol-p-vpol-p)
+     * 012c1b2802 (1920x1080, 2200x1125, 148 MHz, hpol-p-vpol-p)
    * `B`: Horizontal sync polarity.
      * 0: Positive
      * 1: Negative.
