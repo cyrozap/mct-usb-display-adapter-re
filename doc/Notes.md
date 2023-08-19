@@ -189,16 +189,19 @@ value, and "0xYY" is the bRequest value.
  * 0xc0, 0x88: Unknown.
    * wLength: 1
  * 0xc0, 0x89: Get array of video modes supported by the chip.
+   * wValue: Video output index (0 or 1).
    * wIndex: Byte offset.
    * wLength: 512
  * 0xc0, 0xa1: Unknown.
-   * wIndex: Unknown.
+   * wIndex: Video output index (0 or 1)?
    * wLength: 16
  * 0xc0, 0xa2: Unknown.
    * wLength: 16
  * 0xc0, 0xa3: Unknown.
    * wLength: 40
  * 0xc0, 0xa4: Unknown.
+   * wIndex: Video output index (0 or 1)?
+   * wLength: 16
  * 0xc0, 0xa5: Get audio descriptor?
    * wLength: 32
  * 0xc0, 0xb0: Get adapter info field.
