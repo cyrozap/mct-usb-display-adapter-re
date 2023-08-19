@@ -241,18 +241,25 @@ session" packet).
      * 0: Video
      * 3: Audio
      * 5: Firmware update
-   * `<I`: Data length in bytes.
-   * `<I`: Payload length again, with flags?
-   * `<I`: Payload length again?
-   * `16B`: Null bytes.
+   * `<I`: Total session payload length in bytes.
+   * `<I`: Destination address?
+     * 0x00000030 for uncompressed, 0x03000000 for JPEG?
+     * Sending to 0x00000030 the address stays constant?
+       * But then it becomes 0x00c55590?
+   * `<I`: Length of the following data packet?
+   * `<I`: Count of payload bytes written?
+   * `<I`: Video output index?
+   * `<I`: Unknown.
+   * `<I`: Unknown.
  * Audio session data format:
    * N bytes: Raw dual-channel 16-bit little-endian PCM data.
  * Video session packet format:
    * `<I`: Unknown, always 3.
-   * `<I`: Data length in bytes.
-   * `<I`: Packet counter (starts at 1).
-   * `<I`: Unknown.
-   * `<I`: Unknown.
+   * `<I`: Total session payload length in bytes, minus this 0x30-byte header.
+   * `<I`: Session sequence counter (starts at 1).
+   * `<I`: Packet type?
+   * `<H`: Height/width?
+   * `<H`: Width/height?.
    * `<I`: Unknown.
    * `<I`: Unknown.
    * `<I`: Unknown.
