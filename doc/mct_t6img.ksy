@@ -269,11 +269,11 @@ types:
             type: u2
           - id: line_sync_width
             type: u2
-          - id: frame_total_pixels
+          - id: frame_total_lines
             type: u2
-          - id: frame_active_pixels
+          - id: frame_active_lines
             type: u2
-          - id: frame_active_plus_front_porch_pixels
+          - id: frame_active_plus_front_porch_lines
             type: u2
           - id: frame_sync_width
             type: u2
