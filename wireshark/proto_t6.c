@@ -61,6 +61,7 @@ static const value_string INFO_FIELDS[] = {
 
 static const value_string CONTROL_REQS[] = {
     { 0x80, "Get EDID block" },
+    { 0x87, "Get connector status?" },
     { 0x89, "Get video modes" },
     { 0xb0, "Get adapter info field" },
     { 0xb1, "Get adapter session info?" },
