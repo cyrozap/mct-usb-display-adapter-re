@@ -89,11 +89,11 @@ static int HF_T6_CONTROL_REQ_WVAL = -1;
 static int HF_T6_CONTROL_REQ_WIDX = -1;
 static int HF_T6_CONTROL_REQ_WLEN = -1;
 static int HF_T6_CONTROL_REQ_UNKNOWN_DATA = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_CONN_IDX = -1;
 
 static int HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET = -1;
 static int HF_T6_CONTROL_REQ_EDID_BLOCK_DATA = -1;
 
-static int HF_T6_CONTROL_REQ_VIDEO_MODES_OUTPUT_IDX = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODES_DATA = -1;
 
@@ -155,6 +155,10 @@ static hf_register_info HF_T6_CONTROL[] = {
         { "Unknown data", "trigger6.control.unknown_data",
         FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
+    { &HF_T6_CONTROL_REQ_VIDEO_CONN_IDX,
+        { "Video connector index", "trigger6.control.video_connector",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
     { &HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET,
         { "EDID byte offset", "trigger6.control.edid.byte_offset",
         FT_UINT16, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
@@ -162,10 +166,6 @@ static hf_register_info HF_T6_CONTROL[] = {
     { &HF_T6_CONTROL_REQ_EDID_BLOCK_DATA,
         { "EDID block data", "trigger6.control.edid.block_data",
         FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
-    },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODES_OUTPUT_IDX,
-        { "Output index", "trigger6.control.video_modes.output_index",
-        FT_UINT16, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET,
         { "Video modes byte offset", "trigger6.control.video_modes.byte_offset",
@@ -372,10 +372,10 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
             break;
         case 0x89:
             if (setup_not_completion) {
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_OUTPUT_IDX, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
+                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
             } else {
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_OUTPUT_IDX, tvb, 0, 0, wValue));
+                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, 0, 0, wValue));
                 proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET, tvb, 0, 0, wIndex));
             }
             break;
