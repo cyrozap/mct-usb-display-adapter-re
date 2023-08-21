@@ -284,21 +284,34 @@ session" packet).
 Each packet is 64 bytes long.
 
  * `<I`: Packet type?
-   * Values seen: 0x04, 0x20
+   * Values seen:
+     * 0x04
+     * 0x20
+     * 0x80: Firmware update status?
  * `<I`: Unknown.
  * `<I`: Unknown.
  * `<I`: Packet counter? Increments by one with every 0x04-type packet received.
  * `<I`: Unknown.
    * Values seen:
      * Packet type 0x04: 0x01000000, 0x04000000
-     * Packet type 0x20: 0x00000000
+     * Packet types 0x20, 0x80: 0x00000000
  * `<I`: Unknown.
  * `<I`: Unknown.
  * `<I`: Unknown.
  * `<I`: Unknown.
    * Values seen:
-     * Packet type 0x04: 0x00000000
+     * Packet types 0x04, 0x80: 0x00000000
      * Packet type 0x20: 0x02000000, 0x45000000
+ * `<I`: Unknown.
+ * `<I`: Unknown.
+ * `<I`: Unknown.
+   * Values seen:
+     * Packet types 0x04, 0x20: 0x00000000
+     * Packet type 0x80: 0x05010000, 0x05010002, 0x05010003, 0x05010004
+ * `<I`: Unknown.
+   * Values seen:
+     * Packet types 0x04, 0x20: 0x00000000
+     * Packet type 0x80: 0x00010000 through 0x00120000, inclusive
 
 
 [jua365-driver]: https://web.archive.org/web/20210328021458/https://github.com/DC11011100/jua365-driver
