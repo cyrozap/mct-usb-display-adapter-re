@@ -157,7 +157,7 @@ static hf_register_info HF_T6_CONTROL[] = {
     },
     { &HF_T6_CONTROL_REQ_VIDEO_CONN_IDX,
         { "Video connector index", "trigger6.control.video_connector",
-        FT_UINT16, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET,
         { "EDID byte offset", "trigger6.control.edid.byte_offset",
