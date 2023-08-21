@@ -183,6 +183,7 @@ value, and "0xYY" is the bRequest value.
  * 0x40, 0x31: Unknown.
  * 0xc0, 0x80: Get EDID block.
    * wValue: Byte offset.
+   * wIndex: Video output index (0 or 1).
    * wLength: 128
  * 0xc0, 0x87: Get connector status?
    * wValue: Video output index (0 or 1)?

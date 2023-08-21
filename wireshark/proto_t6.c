@@ -366,8 +366,10 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
         case 0x80:
             if (setup_not_completion) {
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
+                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
             } else {
                 proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET, tvb, 0, 0, wValue));
+                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, 0, 0, wIndex));
             }
             break;
         case 0x89:
