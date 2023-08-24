@@ -33,6 +33,36 @@ static const int CTRL_WIDX_OFFSET = 3;
 static const int CTRL_WLEN_OFFSET = 5;
 static const int CTRL_SETUP_DATA_OFFSET = 7;
 
+typedef enum {
+    SELECTOR,
+    FRAGMENT,
+} frame_type;
+
+typedef struct selector_info_s {
+    guint32 frame_num;
+    uint32_t session_num;
+    uint32_t payload_len;
+    uint32_t dest_addr;
+    uint32_t frag_len;
+    uint32_t frag_offset;
+} selector_info_t;
+
+typedef struct frame_info_s {
+    frame_type type;
+    selector_info_t * selector_info;
+    uint32_t frag_len_remaining;
+} frame_info_t;
+
+typedef struct session_conv_info_s {
+    frame_info_t * last_frame;
+} session_conv_info_t;
+
+typedef struct bulk_conv_info_s {
+    frame_info_t * last_frame;
+    wmem_map_t * session_conv_info_by_session_num;
+    wmem_map_t * frame_info_by_frame_num;
+} bulk_conv_info_t;
+
 typedef struct bigger_range_s {
     guint nranges;
     range_admin_t ranges[2];
@@ -47,6 +77,13 @@ static bigger_range_t MCT_USB_PID_RANGE = {
         { .low = (MCT_USB_VID << 16) | 0x5600, .high = (MCT_USB_VID << 16) | 0x561F },
         { .low = (INSIGNIA_USB_VID << 16) | 0x5600, .high = (INSIGNIA_USB_VID << 16) | 0x561F },
     },
+};
+
+static const value_string SESSIONS[] = {
+    { 0, "Video" },
+    { 3, "Audio" },
+    { 5, "Firmware update" },
+    { 0, NULL },
 };
 
 static const value_string INFO_FIELDS[] = {
@@ -309,6 +346,40 @@ static hf_register_info HF_T6_CONTROL[] = {
     },
 };
 
+static int HF_T6_BULK_SESSION_SELECTOR = -1;
+static int HF_T6_BULK_SESSION_NUM = -1;
+static int HF_T6_BULK_SESSION_PAYLOAD_LEN = -1;
+static int HF_T6_BULK_SESSION_PAYLOAD_DEST_ADDR = -1;
+static int HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_LENGTH = -1;
+static int HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_OFFSET = -1;
+
+static hf_register_info HF_T6_BULK[] = {
+    { &HF_T6_BULK_SESSION_SELECTOR,
+        { "Session selector in", "trigger6.bulk.session.selector_in",
+        FT_FRAMENUM, BASE_NONE, FRAMENUM_TYPE(FT_FRAMENUM_REQUEST), 0x0, NULL, HFILL }
+    },
+    { &HF_T6_BULK_SESSION_NUM,
+        { "Session number", "trigger6.bulk.session.num",
+        FT_UINT32, BASE_DEC, VALS(SESSIONS), 0x0, NULL, HFILL }
+    },
+    { &HF_T6_BULK_SESSION_PAYLOAD_LEN,
+        { "Session payload length", "trigger6.bulk.session.payload.len",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_BULK_SESSION_PAYLOAD_DEST_ADDR,
+        { "Session payload destination address", "trigger6.bulk.session.payload.dest_addr",
+        FT_UINT32, BASE_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_LENGTH,
+        { "Session payload fragment length", "trigger6.bulk.session.payload.frag_len",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_OFFSET,
+        { "Session payload fragment offset", "trigger6.bulk.session.payload.frag_offset",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
+};
+
 typedef struct video_mode_s {
     int * hf;
     int size;
@@ -506,6 +577,93 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
         /* BULK 1 IN */
     } else if (usb_conv_info->endpoint == 2 && !usb_conv_info->direction) {
         /* BULK 2 OUT */
+        conversation_t * conversation = find_or_create_conversation(pinfo);
+        bulk_conv_info_t * bulk_conv_info = (bulk_conv_info_t *)conversation_get_proto_data(conversation, PROTO_T6);
+        if (!bulk_conv_info) {
+            bulk_conv_info = wmem_new(wmem_file_scope(), bulk_conv_info_t);
+            bulk_conv_info->last_frame = NULL;
+            bulk_conv_info->session_conv_info_by_session_num = wmem_map_new(wmem_file_scope(), g_direct_hash, g_direct_equal);
+            bulk_conv_info->frame_info_by_frame_num = wmem_map_new(wmem_file_scope(), g_direct_hash, g_direct_equal);
+
+            conversation_add_proto_data(conversation, PROTO_T6, bulk_conv_info);
+        }
+
+        frame_info_t * frame_info = NULL;
+        if (!PINFO_FD_VISITED(pinfo)) {
+            if ((bulk_conv_info->last_frame == NULL) || (bulk_conv_info->last_frame->frag_len_remaining == 0)) {
+                /* Selector */
+
+                /* Create new selector info */
+                selector_info_t * selector_info = wmem_new(wmem_file_scope(), selector_info_t);
+                selector_info->frame_num = pinfo->num;
+                selector_info->session_num = tvb_get_letohl(tvb, 0);
+                selector_info->payload_len = tvb_get_letohl(tvb, 4);
+                selector_info->dest_addr = tvb_get_letohl(tvb, 8);
+                selector_info->frag_len = tvb_get_letohl(tvb, 12);
+                selector_info->frag_offset = tvb_get_letohl(tvb, 16);
+
+                /* Create new frame info */
+                frame_info = wmem_new(wmem_file_scope(), frame_info_t);
+                frame_info->type = SELECTOR;
+                frame_info->selector_info = selector_info;
+                frame_info->frag_len_remaining = selector_info->frag_len;
+
+                bulk_conv_info->last_frame = frame_info;
+
+                session_conv_info_t * session_conv_info = wmem_map_lookup(bulk_conv_info->session_conv_info_by_session_num, GUINT_TO_POINTER(selector_info->session_num));
+                if (!session_conv_info) {
+                    session_conv_info = wmem_new(wmem_file_scope(), session_conv_info_t);
+                }
+                session_conv_info->last_frame = frame_info;
+
+                wmem_map_insert(bulk_conv_info->session_conv_info_by_session_num, GUINT_TO_POINTER(selector_info->session_num), session_conv_info);
+                wmem_map_insert(bulk_conv_info->frame_info_by_frame_num, GUINT_TO_POINTER(pinfo->num), frame_info);
+            } else {
+                /* Fragment */
+                selector_info_t * selector_info = bulk_conv_info->last_frame->selector_info;
+                session_conv_info_t * session_conv_info = wmem_map_lookup(bulk_conv_info->session_conv_info_by_session_num, GUINT_TO_POINTER(selector_info->session_num));
+                if (session_conv_info) {
+                    frame_info_t * last_frame_in_session = session_conv_info->last_frame;
+
+                    /* Create new fragment info */
+                    frame_info = wmem_new(wmem_file_scope(), frame_info_t);
+                    frame_info->type = FRAGMENT;
+                    frame_info->selector_info = selector_info;
+                    frame_info->frag_len_remaining = last_frame_in_session->frag_len_remaining - tvb_reported_length(tvb);
+
+                    bulk_conv_info->last_frame = frame_info;
+
+                    session_conv_info->last_frame = frame_info;
+
+                    wmem_map_insert(bulk_conv_info->frame_info_by_frame_num, GUINT_TO_POINTER(pinfo->num), frame_info);
+                }
+            }
+        } else {
+            frame_info = wmem_map_lookup(bulk_conv_info->frame_info_by_frame_num, GUINT_TO_POINTER(pinfo->num));
+        }
+
+        if (!frame_info) {
+            return 0;
+        }
+
+        if (frame_info->type == SELECTOR) {
+            /* Selector */
+            proto_tree_add_item(tree, HF_T6_BULK_SESSION_NUM, tvb, 0, 4, ENC_LITTLE_ENDIAN);
+            proto_tree_add_item(tree, HF_T6_BULK_SESSION_PAYLOAD_LEN, tvb, 4, 4, ENC_LITTLE_ENDIAN);
+            proto_tree_add_item(tree, HF_T6_BULK_SESSION_PAYLOAD_DEST_ADDR, tvb, 8, 4, ENC_LITTLE_ENDIAN);
+            proto_tree_add_item(tree, HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_LENGTH, tvb, 12, 4, ENC_LITTLE_ENDIAN);
+            proto_tree_add_item(tree, HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_OFFSET, tvb, 16, 4, ENC_LITTLE_ENDIAN);
+        } else {
+            /* Fragment */
+            selector_info_t * selector_info = frame_info->selector_info;
+
+            proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_SELECTOR, tvb, 0, 0, selector_info->frame_num));
+            proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_NUM, tvb, 0, 0, selector_info->session_num));
+            proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_PAYLOAD_LEN, tvb, 0, 0, selector_info->payload_len));
+            proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_PAYLOAD_DEST_ADDR, tvb, 0, 0, selector_info->dest_addr));
+            proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_LENGTH, tvb, 0, 0, selector_info->frag_len));
+            proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_OFFSET, tvb, 0, 0, selector_info->frag_offset));
+        }
     } else {
         return 0;
     }
@@ -553,6 +711,7 @@ void proto_register_trigger6(void) {
     );
 
     proto_register_field_array(PROTO_T6, HF_T6_CONTROL, array_length(HF_T6_CONTROL));
+    proto_register_field_array(PROTO_T6, HF_T6_BULK, array_length(HF_T6_BULK));
 
     T6_HANDLE = register_dissector("trigger6", dissect_t6, PROTO_T6);
 }
