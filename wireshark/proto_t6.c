@@ -711,7 +711,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
                 if (session_conv_info) {
                     frame_info_t * last_frame_in_session = session_conv_info->last_frame;
 
-                    /* Create new fragment info */
+                    /* Create new frame info */
                     frame_info = wmem_new(wmem_file_scope(), frame_info_t);
                     frame_info->type = FRAGMENT;
                     frame_info->selector_info = selector_info;
