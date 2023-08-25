@@ -23,6 +23,7 @@
 #include <epan/dissectors/packet-usb.h>
 #include <epan/packet.h>
 #include <epan/proto.h>
+#include <epan/reassemble.h>
 
 #include "proto_t6.h"
 
@@ -50,6 +51,7 @@ typedef struct selector_info_s {
 typedef struct frame_info_s {
     frame_type type;
     selector_info_t * selector_info;
+    uint32_t payload_len_remaining;
     uint32_t frag_len_remaining;
 } frame_info_t;
 
@@ -117,6 +119,8 @@ static const value_string CONF_TYPES[] = {
 };
 
 static dissector_handle_t T6_HANDLE = NULL;
+
+static reassembly_table T6_REASSEMBLY_TABLE = { 0 };
 
 static int PROTO_T6 = -1;
 
@@ -352,6 +356,7 @@ static int HF_T6_BULK_SESSION_PAYLOAD_LEN = -1;
 static int HF_T6_BULK_SESSION_PAYLOAD_DEST_ADDR = -1;
 static int HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_LENGTH = -1;
 static int HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_OFFSET = -1;
+static int HF_T6_BULK_SESSION_PAYLOAD_DATA = -1;
 
 static hf_register_info HF_T6_BULK[] = {
     { &HF_T6_BULK_SESSION_SELECTOR,
@@ -377,6 +382,84 @@ static hf_register_info HF_T6_BULK[] = {
     { &HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_OFFSET,
         { "Session payload fragment offset", "trigger6.bulk.session.payload.frag_offset",
         FT_UINT32, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_BULK_SESSION_PAYLOAD_DATA,
+        { "Session payload data", "trigger6.bulk.session.payload.data",
+        FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+};
+
+static int HF_T6_BULK_FRAGMENTS = -1;
+static int HF_T6_BULK_FRAGMENT = -1;
+static int HF_T6_BULK_FRAGMENT_OVERLAP = -1;
+static int HF_T6_BULK_FRAGMENT_OVERLAP_CONFLICTS = -1;
+static int HF_T6_BULK_FRAGMENT_MULTIPLE_TAILS = -1;
+static int HF_T6_BULK_FRAGMENT_TOO_LONG_FRAGMENT = -1;
+static int HF_T6_BULK_FRAGMENT_ERROR = -1;
+static int HF_T6_BULK_FRAGMENT_COUNT = -1;
+static int HF_T6_BULK_REASSEMBLED_IN = -1;
+static int HF_T6_BULK_REASSEMBLED_LENGTH = -1;
+
+static int ETT_T6_BULK_FRAGMENT = -1;
+static int ETT_T6_BULK_FRAGMENTS = -1;
+
+static const fragment_items T6_BULK_FRAG_ITEMS = {
+    &ETT_T6_BULK_FRAGMENT,
+    &ETT_T6_BULK_FRAGMENTS,
+    &HF_T6_BULK_FRAGMENTS,
+    &HF_T6_BULK_FRAGMENT,
+    &HF_T6_BULK_FRAGMENT_OVERLAP,
+    &HF_T6_BULK_FRAGMENT_OVERLAP_CONFLICTS,
+    &HF_T6_BULK_FRAGMENT_MULTIPLE_TAILS,
+    &HF_T6_BULK_FRAGMENT_TOO_LONG_FRAGMENT,
+    &HF_T6_BULK_FRAGMENT_ERROR,
+    &HF_T6_BULK_FRAGMENT_COUNT,
+    &HF_T6_BULK_REASSEMBLED_IN,
+    &HF_T6_BULK_REASSEMBLED_LENGTH,
+    NULL,
+    "Payload fragments",
+};
+
+static hf_register_info HF_T6_BULK_FRAG[] = {
+    { &HF_T6_BULK_FRAGMENTS,
+        { "Payload fragments", "trigger6.bulk.session.payload.fragments",
+        FT_NONE, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_FRAGMENT,
+        { "Payload fragment", "trigger6.bulk.session.payload.fragment",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_FRAGMENT_OVERLAP,
+        { "Payload fragment overlap", "trigger6.bulk.session.payload.fragment.overlap",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_FRAGMENT_OVERLAP_CONFLICTS,
+        { "Payload fragment overlapping with conflicting data", "trigger6.bulk.session.payload.fragment.overlap.conflicts",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_FRAGMENT_MULTIPLE_TAILS,
+        { "Payload has multiple tail fragments", "trigger6.bulk.session.payload.fragment.multiple_tails",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_FRAGMENT_TOO_LONG_FRAGMENT,
+        { "Payload fragment too long", "trigger6.bulk.session.payload.fragment.too_long_fragment",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_FRAGMENT_ERROR,
+        { "Payload defragmentation error", "trigger6.bulk.session.payload.fragment.error",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_FRAGMENT_COUNT,
+        { "Payload fragment count", "trigger6.bulk.session.payload.fragment.count",
+        FT_UINT32, BASE_DEC, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_REASSEMBLED_IN,
+        { "Reassembled in", "trigger6.bulk.session.payload.reassembled.in",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_BULK_REASSEMBLED_LENGTH,
+        { "Reassembled length", "trigger6.bulk.session.payload.reassembled.length",
+        FT_UINT32, BASE_DEC, NULL, 0x00, NULL, HFILL }
     },
 };
 
@@ -411,6 +494,8 @@ static int * const ETT[] = {
     &ETT_T6,
     &ETT_T6_VIDEO_MODES,
     &ETT_T6_VIDEO_MODE,
+    &ETT_T6_BULK_FRAGMENT,
+    &ETT_T6_BULK_FRAGMENTS,
 };
 
 static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t  *usb_conv_info) {
@@ -606,6 +691,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
                 frame_info = wmem_new(wmem_file_scope(), frame_info_t);
                 frame_info->type = SELECTOR;
                 frame_info->selector_info = selector_info;
+                frame_info->payload_len_remaining = selector_info->payload_len - selector_info->frag_offset;
                 frame_info->frag_len_remaining = selector_info->frag_len;
 
                 bulk_conv_info->last_frame = frame_info;
@@ -629,6 +715,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
                     frame_info = wmem_new(wmem_file_scope(), frame_info_t);
                     frame_info->type = FRAGMENT;
                     frame_info->selector_info = selector_info;
+                    frame_info->payload_len_remaining = last_frame_in_session->payload_len_remaining - tvb_reported_length(tvb);
                     frame_info->frag_len_remaining = last_frame_in_session->frag_len_remaining - tvb_reported_length(tvb);
 
                     bulk_conv_info->last_frame = frame_info;
@@ -663,6 +750,37 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
             proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_PAYLOAD_DEST_ADDR, tvb, 0, 0, selector_info->dest_addr));
             proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_LENGTH, tvb, 0, 0, selector_info->frag_len));
             proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_BULK_SESSION_PAYLOAD_FRAGMENT_OFFSET, tvb, 0, 0, selector_info->frag_offset));
+
+            tvbuff_t * next_tvb = NULL;
+            if ((selector_info->payload_len > selector_info->frag_len) || (selector_info->frag_len > tvb_reported_length(tvb))) {
+                /* Fragmented */
+                pinfo->fragmented = true;
+
+                uint32_t calc_frag_offset = selector_info->payload_len - frame_info->payload_len_remaining - tvb_reported_length(tvb);
+                gboolean more_frags = frame_info->payload_len_remaining > 0;
+
+                fragment_head * frag_head = fragment_add_check(&T6_REASSEMBLY_TABLE,
+                    tvb, 0, pinfo, selector_info->session_num, NULL,
+                    calc_frag_offset, tvb_captured_length(tvb), more_frags);
+
+                next_tvb = process_reassembled_data(tvb, 0, pinfo, "Reassembled Payload", frag_head, &T6_BULK_FRAG_ITEMS, NULL, tree);
+
+                if (frag_head) {
+                    /* Reassembled */
+                    col_append_str(pinfo->cinfo, COL_INFO, " (Payload Reassembled)");
+                } else {
+                    /* Failed to reassemble. This can happen when a packet captures less data than was reported, which
+                     * seems to be common with captured firmware updates. */
+                    col_append_fstr(pinfo->cinfo, COL_INFO, " (Fragment offset %u)", calc_frag_offset);
+                }
+            } else {
+                /* Not fragmented */
+                next_tvb = tvb;
+            }
+
+            if (next_tvb) {
+                proto_tree_add_item(tree, HF_T6_BULK_SESSION_PAYLOAD_DATA, next_tvb, 0, -1, ENC_NA);
+            }
         }
     } else {
         return 0;
@@ -710,8 +828,11 @@ void proto_register_trigger6(void) {
         "trigger6"
     );
 
+    reassembly_table_register(&T6_REASSEMBLY_TABLE, &addresses_reassembly_table_functions);
+
     proto_register_field_array(PROTO_T6, HF_T6_CONTROL, array_length(HF_T6_CONTROL));
     proto_register_field_array(PROTO_T6, HF_T6_BULK, array_length(HF_T6_BULK));
+    proto_register_field_array(PROTO_T6, HF_T6_BULK_FRAG, array_length(HF_T6_BULK_FRAG));
 
     T6_HANDLE = register_dissector("trigger6", dissect_t6, PROTO_T6);
 }
