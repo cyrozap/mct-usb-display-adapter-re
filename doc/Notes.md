@@ -171,8 +171,10 @@ value, and "0xYY" is the bRequest value.
 Commands are in the form of "0xXX, 0xYY", where "0xXX" is the bmRequestType
 value, and "0xYY" is the bRequest value.
 
- * 0x40, 0x03: Unknown.
-   * wIndex: 1
+ * 0x40, 0x03: Enable/disable video output?
+   * wIndex:
+     * 0x0000: Disable video output?
+     * 0x0001: Enable video output?
  * 0x40, 0x04: Set cursor position?
    * wValue: Horizontal pixel position?
    * wIndex: Vertical pixel position?
