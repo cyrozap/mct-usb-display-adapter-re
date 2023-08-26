@@ -173,6 +173,17 @@ value, and "0xYY" is the bRequest value.
 
  * 0x40, 0x03: Unknown.
    * wIndex: 1
+ * 0x40, 0x04: Set cursor position?
+   * wValue: Horizontal pixel position?
+   * wIndex: Vertical pixel position?
+ * 0x40, 0x05: Set cursor visibility?
+   * wIndex:
+     * 0x0000: Hidden?
+     * 0x0001: Visible?
+ * 0x40, 0x10: Upload cursor data?
+   * wIndex: Byte offset into cursor data array.
+   * wLength: N
+   * Data: N bytes of 64x64-pixel cursor data in BGRA8888? or RGBA8888? format.
  * 0x40, 0x12: Set video mode?
    * wLength: 32
  * 0x40, 0x23: Unknown.
