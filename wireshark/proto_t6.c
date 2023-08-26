@@ -498,7 +498,7 @@ static int * const ETT[] = {
     &ETT_T6_BULK_FRAGMENTS,
 };
 
-static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t  *usb_conv_info) {
+static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
     gboolean in_not_out = usb_conv_info->direction != 0;
     gboolean setup_not_completion = usb_conv_info->is_setup;
     uint8_t bRequest = usb_conv_info->usb_trans_info->setup.request;
@@ -657,7 +657,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
     return tvb_captured_length(tvb);
 }
 
-static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t  *usb_conv_info) {
+static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
     if (usb_conv_info->endpoint == 1 && usb_conv_info->direction) {
         /* BULK 1 IN */
     } else if (usb_conv_info->endpoint == 2 && !usb_conv_info->direction) {
@@ -789,14 +789,14 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
     return tvb_captured_length(tvb);
 }
 
-static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t  *usb_conv_info) {
+static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
     /* INTERRUPT IN */
 
     return tvb_captured_length(tvb);
 }
 
 static int dissect_t6(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data) {
-    usb_conv_info_t  *usb_conv_info = (usb_conv_info_t *)data;
+    usb_conv_info_t * usb_conv_info = (usb_conv_info_t *)data;
 
     proto_item * t6_tree_item = proto_tree_add_item(tree, PROTO_T6, tvb, 0, -1, ENC_NA);
     proto_tree * t6_tree = proto_item_add_subtree(t6_tree_item, ETT_T6);
