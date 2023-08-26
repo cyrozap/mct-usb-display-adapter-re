@@ -270,7 +270,7 @@ session" packet).
    * `<I`: Unknown.
    * `<I`: Unknown.
  * Audio session data format:
-   * N bytes: Raw dual-channel 16-bit little-endian PCM data.
+   * N bytes: Raw dual-channel 16-bit little-endian signed PCM data.
  * Video session packet format:
    * `<I`: Packet type? Values seen: 3, 4, 7
    * `<I`: The length of the payload after this 0x30-byte header.
