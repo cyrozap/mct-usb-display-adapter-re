@@ -463,12 +463,12 @@ static hf_register_info HF_T6_BULK_FRAG[] = {
     },
 };
 
-typedef struct video_mode_s {
+typedef struct field_sizes_s {
     int * hf;
     int size;
-} video_mode_t;
+} field_sizes_t;
 
-static const video_mode_t video_mode_fields[] = {
+static const field_sizes_t video_mode_fields[] = {
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PIXEL_CLK_KHZ, 4 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_REFRESH_RATE_HZ, 2 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_TOTAL_PIXELS, 2 },
