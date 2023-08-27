@@ -299,8 +299,8 @@ Each packet is 64 bytes long.
 
  * `<I`: Packet type?
    * Values seen:
-     * 0x04
-     * 0x20
+     * 0x04: Status change?
+     * 0x20: Current state?
      * 0x80: Firmware update status?
  * `<I`: Unknown.
  * `<I`: Unknown.
@@ -308,6 +308,9 @@ Each packet is 64 bytes long.
  * `<I`: Unknown.
    * Values seen:
      * Packet type 0x04: 0x01000000, 0x04000000
+       * Flags?
+         * Bit 25: Connector 1 status change.
+         * Bit 24: Connector 0 status change.
      * Packet types 0x20, 0x80: 0x00000000
  * `<I`: Unknown.
  * `<I`: Unknown.
@@ -316,6 +319,11 @@ Each packet is 64 bytes long.
    * Values seen:
      * Packet types 0x04, 0x80: 0x00000000
      * Packet type 0x20: 0x02000000, 0x45000000
+       * Flags?
+         * Bit 30: Unknown.
+         * Bit 26: Connector 1 status. (0: Disconnected, 1: Connected)
+         * Bit 25: Connector 0 status. (0: Disconnected, 1: Connected)
+         * Bit 24: Unknown.
  * `<I`: Unknown.
  * `<I`: Unknown.
  * `<I`: Unknown.
