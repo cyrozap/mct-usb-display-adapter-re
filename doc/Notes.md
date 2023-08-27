@@ -198,12 +198,12 @@ value, and "0xYY" is the bRequest value.
    * wValue: Byte offset.
    * wIndex: Video output index (0 or 1).
    * wLength: 128
- * 0xc0, 0x87: Get connector status?
-   * wValue: Video output index (0 or 1)?
+ * 0xc0, 0x87: Get connector status.
+   * wValue: Video output index (0 or 1).
    * wLength: 1
    * Return value:
-     * 0x00: Disconnected?
-     * 0x01: Connected?
+     * 0x00: Disconnected.
+     * 0x01: Connected.
  * 0xc0, 0x88: Unknown.
    * wLength: 1
  * 0xc0, 0x89: Get array of video modes supported by the chip.
