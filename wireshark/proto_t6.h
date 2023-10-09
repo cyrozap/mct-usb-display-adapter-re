@@ -18,5 +18,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef PROTO_T6_H_INCLUDED
+#define PROTO_T6_H_INCLUDED
+
 void proto_register_trigger6(void);
 void proto_reg_handoff_trigger6(void);
+
+#endif // PROTO_T6_H_INCLUDED
