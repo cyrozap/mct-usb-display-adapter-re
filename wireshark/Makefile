@@ -31,8 +31,11 @@ mct_trigger.so: plugin.o proto_t6.o
 install: mct_trigger.so
 	install -Dm755 $< $(HOME)/.local/lib/wireshark/plugins/4.0/epan/$<
 
+link: mct_trigger.so
+	ln -s $(CURDIR)/$< $(HOME)/.local/lib/wireshark/plugins/4.0/epan/$<
+
 clean:
 	rm -f *.o *.so
 
 
-.PHONY: all clean install
+.PHONY: all clean install link
