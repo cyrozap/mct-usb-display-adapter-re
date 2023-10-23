@@ -813,7 +813,7 @@ static int dissect_t6(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void 
             if (!usb_conv_info->direction) {
                 return 0;
             }
-            return handle_interrupt(tvb, pinfo, t6_tree, usb_conv_info);;
+            return handle_interrupt(tvb, pinfo, t6_tree, usb_conv_info);
         default:
             return 0;
     };
