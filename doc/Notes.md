@@ -88,8 +88,8 @@ value, and "0xYY" is the bRequest value.
        * `B`: Pixel clock in MHz.
        * `B`: Bits per pixel.
        * `B`: Mode number.
-       * `<H`: Width in pixels.
        * `<H`: Height in pixels.
+       * `<H`: Width in pixels.
  * 0xc0, 0xa5: Read internal memory/MMIO registers.
    * wIndex: Memory address.
    * wLength: Number of bytes, 1-4.
