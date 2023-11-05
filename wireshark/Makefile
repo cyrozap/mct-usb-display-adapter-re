@@ -25,7 +25,7 @@ all: mct_trigger.so
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-mct_trigger.so: plugin.o proto_t6.o
+mct_trigger.so: plugin.o proto_t5.o proto_t6.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o $@ $^
 
 install: mct_trigger.so
