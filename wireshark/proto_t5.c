@@ -21,7 +21,10 @@
 #include <stdint.h>
 
 #include <epan/dissectors/packet-usb.h>
+#include <epan/expert.h>
+#include <epan/packet.h>
 #include <epan/proto.h>
+#include <epan/reassemble.h>
 
 #include "proto_t5.h"
 
@@ -31,6 +34,30 @@ static const int CTRL_WVAL_OFFSET = 1;
 static const int CTRL_WIDX_OFFSET = 3;
 static const int CTRL_WLEN_OFFSET = 5;
 static const int CTRL_SETUP_DATA_OFFSET = 7;
+
+typedef struct header_info_s {
+    uint16_t frame_counter;
+    uint16_t frame_flags;
+    uint16_t horiz_offset;
+    uint16_t vert_offset;
+    uint16_t width;
+    uint16_t height;
+    uint32_t payload_len;
+    uint32_t payload_flags;
+} header_info_t;
+
+typedef struct fragment_info_s {
+    uint32_t header_fragment_frame_num;
+    uint32_t fragment_offset;
+    uint32_t fragment_len;
+    uint32_t packet_len_remaining;
+} fragment_info_t;
+
+typedef struct bulk_conv_info_s {
+    fragment_info_t * last_fragment_info;
+    wmem_map_t * header_info_by_frame_num;
+    wmem_map_t * fragment_info_by_frame_num;
+} bulk_conv_info_t;
 
 static const uint32_t MCT_USB_VID = 0x0711;
 
@@ -71,6 +98,8 @@ static const value_string CONTROL_REQS[] = {
 static const true_false_string tfs_sync_polarity = { "Negative", "Positive" };
 
 static dissector_handle_t T5_HANDLE = NULL;
+
+static reassembly_table T5_REASSEMBLY_TABLE = { 0 };
 
 static int PROTO_T5 = -1;
 
@@ -385,6 +414,164 @@ static const field_sizes_t video_mode_get_fields[] = {
     { &HF_T5_CONTROL_REQ_VIDEO_MODE_INFO_WIDTH, 2 },
 };
 
+static int HF_T5_BULK_MAGIC = -1;
+static int HF_T5_BULK_HEADER_LEN = -1;
+static int HF_T5_BULK_FRAME_INFO = -1;
+static int HF_T5_BULK_FRAME_FLAGS = -1;
+static int HF_T5_BULK_FRAME_COUNTER = -1;
+static int HF_T5_BULK_H_OFFSET = -1;
+static int HF_T5_BULK_V_OFFSET = -1;
+static int HF_T5_BULK_WIDTH = -1;
+static int HF_T5_BULK_HEIGHT = -1;
+static int HF_T5_BULK_PAYLOAD_INFO = -1;
+static int HF_T5_BULK_PAYLOAD_FLAGS = -1;
+static int HF_T5_BULK_PAYLOAD_LEN = -1;
+static int HF_T5_BULK_OTHER_FLAGS = -1;
+static int HF_T5_BULK_HEADER_CHECKSUM = -1;
+static int HF_T5_BULK_PAYLOAD_FRAGMENT = -1;
+static int HF_T5_BULK_REASSEMBLED_PAYLOAD = -1;
+
+static hf_register_info HF_T5_BULK[] = {
+    { &HF_T5_BULK_MAGIC,
+        { "Header magic", "trigger5.bulk.magic",
+        FT_UINT8, BASE_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_HEADER_LEN,
+        { "Header length", "trigger5.bulk.header_len",
+        FT_UINT8, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAME_INFO,
+        { "Frame info", "trigger5.bulk.frame_info",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAME_FLAGS,
+        { "Frame flags", "trigger5.bulk.frame_info.flags",
+        FT_UINT16, BASE_HEX, NULL, 0xF000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAME_COUNTER,
+        { "Frame counter", "trigger5.bulk.frame_info.counter",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x0FFF, NULL, HFILL }
+    },
+    { &HF_T5_BULK_H_OFFSET,
+        { "Horizontal offset", "trigger5.bulk.horizontal_offset",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
+    },
+    { &HF_T5_BULK_V_OFFSET,
+        { "Vertical offset", "trigger5.bulk.vertical_offset",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
+    },
+    { &HF_T5_BULK_WIDTH,
+        { "Width", "trigger5.bulk.width",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
+    },
+    { &HF_T5_BULK_HEIGHT,
+        { "Height", "trigger5.bulk.height",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
+    },
+    { &HF_T5_BULK_PAYLOAD_INFO,
+        { "Payload info", "trigger5.bulk.payload_info",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_PAYLOAD_FLAGS,
+        { "Payload flags", "trigger5.bulk.payload_info.flags",
+        FT_UINT32, BASE_HEX, NULL, 0xF0000000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_PAYLOAD_LEN,
+        { "Payload length", "trigger5.bulk.payload_info.len",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x0FFFFFFF, NULL, HFILL }
+    },
+    { &HF_T5_BULK_OTHER_FLAGS,
+        { "Other flags", "trigger5.bulk.other_flags",
+        FT_UINT8, BASE_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_HEADER_CHECKSUM,
+        { "Header checksum", "trigger5.bulk.header_checksum",
+        FT_UINT8, BASE_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_PAYLOAD_FRAGMENT,
+        { "Payload fragment", "trigger5.bulk.payload_fragment",
+        FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_REASSEMBLED_PAYLOAD,
+        { "Reassembled payload", "trigger5.bulk.reassembled_payload",
+        FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+};
+
+static int HF_T5_BULK_FRAGMENTS = -1;
+static int HF_T5_BULK_FRAGMENT = -1;
+static int HF_T5_BULK_FRAGMENT_OVERLAP = -1;
+static int HF_T5_BULK_FRAGMENT_OVERLAP_CONFLICTS = -1;
+static int HF_T5_BULK_FRAGMENT_MULTIPLE_TAILS = -1;
+static int HF_T5_BULK_FRAGMENT_TOO_LONG_FRAGMENT = -1;
+static int HF_T5_BULK_FRAGMENT_ERROR = -1;
+static int HF_T5_BULK_FRAGMENT_COUNT = -1;
+static int HF_T5_BULK_REASSEMBLED_IN = -1;
+static int HF_T5_BULK_REASSEMBLED_LENGTH = -1;
+
+static int ETT_T5_BULK_FRAGMENT = -1;
+static int ETT_T5_BULK_FRAGMENTS = -1;
+
+static const fragment_items T5_BULK_FRAG_ITEMS = {
+    &ETT_T5_BULK_FRAGMENT,
+    &ETT_T5_BULK_FRAGMENTS,
+    &HF_T5_BULK_FRAGMENTS,
+    &HF_T5_BULK_FRAGMENT,
+    &HF_T5_BULK_FRAGMENT_OVERLAP,
+    &HF_T5_BULK_FRAGMENT_OVERLAP_CONFLICTS,
+    &HF_T5_BULK_FRAGMENT_MULTIPLE_TAILS,
+    &HF_T5_BULK_FRAGMENT_TOO_LONG_FRAGMENT,
+    &HF_T5_BULK_FRAGMENT_ERROR,
+    &HF_T5_BULK_FRAGMENT_COUNT,
+    &HF_T5_BULK_REASSEMBLED_IN,
+    &HF_T5_BULK_REASSEMBLED_LENGTH,
+    NULL,
+    "Packet fragments",
+};
+
+static hf_register_info HF_T5_BULK_FRAG[] = {
+    { &HF_T5_BULK_FRAGMENTS,
+        { "Packet fragments", "trigger5.bulk.fragments",
+        FT_NONE, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAGMENT,
+        { "Packet fragment", "trigger5.bulk.fragment",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAGMENT_OVERLAP,
+        { "Packet fragment overlap", "trigger5.bulk.fragment.overlap",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAGMENT_OVERLAP_CONFLICTS,
+        { "Packet fragment overlapping with conflicting data", "trigger5.bulk.fragment.overlap.conflicts",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAGMENT_MULTIPLE_TAILS,
+        { "Packet has multiple tail fragments", "trigger5.bulk.fragment.multiple_tails",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAGMENT_TOO_LONG_FRAGMENT,
+        { "Packet fragment too long", "trigger5.bulk.fragment.too_long_fragment",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAGMENT_ERROR,
+        { "Packet defragmentation error", "trigger5.bulk.fragment.error",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAGMENT_COUNT,
+        { "Packet fragment count", "trigger5.bulk.fragment.count",
+        FT_UINT32, BASE_DEC, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_REASSEMBLED_IN,
+        { "Reassembled in", "trigger5.bulk.reassembled.in",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T5_BULK_REASSEMBLED_LENGTH,
+        { "Reassembled length", "trigger5.bulk.reassembled.length",
+        FT_UINT32, BASE_DEC, NULL, 0x00, NULL, HFILL }
+    },
+};
+
 static int ETT_T5 = -1;
 static int ETT_T5_FIRMWARE_VERSION = -1;
 static int ETT_T5_FIRMWARE_DATE = -1;
@@ -398,7 +585,35 @@ static int * const ETT[] = {
     &ETT_T5_VIDEO_MODE_PLL_CONFIG,
     &ETT_T5_VIDEO_MODES,
     &ETT_T5_VIDEO_MODE_INFO,
+    &ETT_T5_BULK_FRAGMENT,
+    &ETT_T5_BULK_FRAGMENTS,
 };
+
+static expert_field EI_T5_BULK_HEADER_CHECKSUM_INVALID = EI_INIT;
+
+static ei_register_info EI_T5_BULK[] = {
+    { &EI_T5_BULK_HEADER_CHECKSUM_INVALID,
+        { "trigger5.bulk.header_checksum_invalid", PI_CHECKSUM, PI_WARN,
+            "Header checksum is invalid", EXPFILL }
+    },
+};
+
+static uint8_t bulk_header_checksum(const uint8_t *buf, uint32_t len) {
+    int32_t checksum = 0;
+
+    for (size_t i = 0; i < len; i++) {
+        checksum += buf[i];
+    }
+
+    return (-checksum) & 0xFF;
+}
+
+static uint8_t bulk_header_checksum_tvb_offset(tvbuff_t *tvb, uint32_t offset, uint32_t len) {
+    tvb_ensure_bytes_exist(tvb, offset, len);
+    const uint8_t * buf = tvb_get_ptr(tvb, offset, len);
+
+    return bulk_header_checksum(buf, len);
+}
 
 static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb_conv_info_t *usb_conv_info) {
     gboolean in_not_out = usb_conv_info->direction != 0;
@@ -579,9 +794,154 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb
 
     /* BULK 1 OUT */
 
-    proto_tree_add_item(ptree, PROTO_T5, tvb, 0, -1, ENC_NA);
+    proto_item * t5_tree_item = proto_tree_add_item(ptree, PROTO_T5, tvb, 0, -1, ENC_NA);
+    proto_tree * tree = proto_item_add_subtree(t5_tree_item, ETT_T5);
 
     col_set_str(pinfo->cinfo, COL_PROTOCOL, "Trigger 5");
+
+    conversation_t * conversation = find_or_create_conversation(pinfo);
+    bulk_conv_info_t * bulk_conv_info = (bulk_conv_info_t *)conversation_get_proto_data(conversation, PROTO_T5);
+    if (!bulk_conv_info) {
+        bulk_conv_info = wmem_new(wmem_file_scope(), bulk_conv_info_t);
+        bulk_conv_info->last_fragment_info = NULL;
+        bulk_conv_info->header_info_by_frame_num = wmem_map_new(wmem_file_scope(), g_direct_hash, g_direct_equal);
+        bulk_conv_info->fragment_info_by_frame_num = wmem_map_new(wmem_file_scope(), g_direct_hash, g_direct_equal);
+
+        conversation_add_proto_data(conversation, PROTO_T5, bulk_conv_info);
+    }
+
+    fragment_info_t * fragment_info = NULL;
+    if (!PINFO_FD_VISITED(pinfo)) {
+        if ((bulk_conv_info->last_fragment_info == NULL) || (bulk_conv_info->last_fragment_info->packet_len_remaining == 0)) {
+            /* Packet with header */
+
+            if (tvb_get_ntohs(tvb, 0) != 0xfb14) {
+                return 0;
+            }
+
+            /* Create new header info */
+            header_info_t * header_info = wmem_new(wmem_file_scope(), header_info_t);
+            uint16_t frame_counter_and_flags = tvb_get_letohs(tvb, 2);
+            header_info->frame_counter = frame_counter_and_flags & 0x0FFF;
+            header_info->frame_flags = frame_counter_and_flags >> 12;
+            header_info->horiz_offset = tvb_get_letohs(tvb, 4) & 0x1FFF;
+            header_info->vert_offset = tvb_get_letohs(tvb, 6) & 0x1FFF;
+            header_info->width = tvb_get_letohs(tvb, 8) & 0x1FFF;
+            header_info->height = tvb_get_letohs(tvb, 10) & 0x1FFF;
+            header_info->payload_len = tvb_get_letohl(tvb, 12) & 0x0FFFFFFF;
+            header_info->payload_flags = tvb_get_letohl(tvb, 12) >> 28;
+
+            wmem_map_insert(bulk_conv_info->header_info_by_frame_num, GUINT_TO_POINTER(pinfo->num), header_info);
+
+            /* Create new packet info */
+            fragment_info = wmem_new(wmem_file_scope(), fragment_info_t);
+            fragment_info->header_fragment_frame_num = pinfo->num;
+            fragment_info->fragment_offset = 0;
+            uint32_t total_packet_length = 20 + header_info->payload_len;
+            fragment_info->fragment_len = MIN(total_packet_length, tvb_reported_length(tvb));
+            fragment_info->packet_len_remaining = total_packet_length - fragment_info->fragment_len;
+
+            bulk_conv_info->last_fragment_info = fragment_info;
+
+            wmem_map_insert(bulk_conv_info->fragment_info_by_frame_num, GUINT_TO_POINTER(pinfo->num), fragment_info);
+        } else {
+            /* Fragment */
+            header_info_t * header_info = wmem_map_lookup(bulk_conv_info->header_info_by_frame_num,
+                                                          GUINT_TO_POINTER(bulk_conv_info->last_fragment_info->header_fragment_frame_num));
+            if (header_info) {
+                /* Create new frame info */
+                fragment_info = wmem_new(wmem_file_scope(), fragment_info_t);
+                fragment_info->header_fragment_frame_num = bulk_conv_info->last_fragment_info->header_fragment_frame_num;
+                fragment_info->fragment_offset = bulk_conv_info->last_fragment_info->fragment_offset + bulk_conv_info->last_fragment_info->fragment_len;
+                fragment_info->fragment_len = MIN(bulk_conv_info->last_fragment_info->packet_len_remaining, tvb_reported_length(tvb));
+                fragment_info->packet_len_remaining = bulk_conv_info->last_fragment_info->packet_len_remaining - fragment_info->fragment_len;
+
+                bulk_conv_info->last_fragment_info = fragment_info;
+
+                wmem_map_insert(bulk_conv_info->fragment_info_by_frame_num, GUINT_TO_POINTER(pinfo->num), fragment_info);
+            }
+        }
+    } else {
+        fragment_info = wmem_map_lookup(bulk_conv_info->fragment_info_by_frame_num, GUINT_TO_POINTER(pinfo->num));
+    }
+
+    if (!fragment_info) {
+        return 0;
+    }
+
+    header_info_t * header_info = header_info = wmem_map_lookup(bulk_conv_info->header_info_by_frame_num, GUINT_TO_POINTER(fragment_info->header_fragment_frame_num));
+    if (!header_info) {
+        return 0;
+    }
+
+    tvbuff_t * next_tvb = NULL;
+
+    bool packet_has_header = pinfo->num == fragment_info->header_fragment_frame_num;
+    if (packet_has_header) {
+        /* Packet with header */
+        proto_tree_add_item(tree, HF_T5_BULK_MAGIC, tvb, 0, 1, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_HEADER_LEN, tvb, 1, 1, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_FRAME_FLAGS, tvb, 2, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_FRAME_COUNTER, tvb, 2, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_H_OFFSET, tvb, 4, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_V_OFFSET, tvb, 6, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_WIDTH, tvb, 8, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_HEIGHT, tvb, 10, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_FLAGS, tvb, 12, 4, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 12, 4, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_OTHER_FLAGS, tvb, 16, 1, ENC_LITTLE_ENDIAN);
+        uint32_t header_checksum = 0;
+        proto_item * checksum_item = proto_tree_add_item_ret_uint(tree, HF_T5_BULK_HEADER_CHECKSUM, tvb, 19, 1, ENC_LITTLE_ENDIAN, &header_checksum);
+        if (bulk_header_checksum_tvb_offset(tvb, 0, 19) != header_checksum) {
+            expert_add_info(pinfo, checksum_item, &EI_T5_BULK_HEADER_CHECKSUM_INVALID);
+        }
+        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_FRAGMENT, tvb, 20, MIN(header_info->payload_len, tvb_captured_length(tvb) - 20), ENC_NA);
+
+        if ((20 + header_info->payload_len > fragment_info->fragment_len)) {
+            /* Fragmented */
+            pinfo->fragmented = true;
+        } else {
+            /* Not fragmented */
+            next_tvb = tvb;
+        }
+    } else {
+        /* Fragment */
+        pinfo->fragmented = true;
+
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_FRAME_FLAGS, tvb, 0, 0, header_info->frame_flags << 12));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_FRAME_COUNTER, tvb, 0, 0, header_info->frame_counter));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_H_OFFSET, tvb, 0, 0, header_info->horiz_offset));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_V_OFFSET, tvb, 0, 0, header_info->vert_offset));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_WIDTH, tvb, 0, 0, header_info->width));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_HEIGHT, tvb, 0, 0, header_info->height));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_PAYLOAD_FLAGS, tvb, 0, 0, header_info->payload_flags << 28));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 0, 0, header_info->payload_len));
+
+        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_FRAGMENT, tvb, 0, MIN(fragment_info->fragment_len, tvb_captured_length(tvb)), ENC_NA);
+    }
+
+    if (pinfo->fragmented) {
+        /* Fragmented */
+        gboolean more_frags = fragment_info->packet_len_remaining > 0;
+
+        fragment_head * frag_head = fragment_add_check(&T5_REASSEMBLY_TABLE,
+            tvb, 0, pinfo, 0, NULL, fragment_info->fragment_offset, tvb_captured_length(tvb), more_frags);
+
+        next_tvb = process_reassembled_data(tvb, 0, pinfo, "Reassembled Packet", frag_head, &T5_BULK_FRAG_ITEMS, NULL, tree);
+
+        if (frag_head) {
+            /* Reassembled */
+            col_append_str(pinfo->cinfo, COL_INFO, " (Packet Reassembled)");
+        } else {
+            /* Failed to reassemble. This can happen when a packet captures less data than was reported, which
+                * seems to be common with captured firmware updates. */
+            col_append_fstr(pinfo->cinfo, COL_INFO, " (Fragment offset %u)", fragment_info->fragment_offset);
+        }
+    }
+
+    if (next_tvb) {
+        proto_tree_add_item(tree, HF_T5_BULK_REASSEMBLED_PAYLOAD, next_tvb, 20, MIN(header_info->payload_len, tvb_captured_length(next_tvb) - 20), ENC_NA);
+    }
 
     return tvb_captured_length(tvb);
 }
@@ -620,7 +980,14 @@ void proto_register_trigger5(void) {
         "trigger5"
     );
 
+    reassembly_table_register(&T5_REASSEMBLY_TABLE, &addresses_reassembly_table_functions);
+
     proto_register_field_array(PROTO_T5, HF_T5_CONTROL, array_length(HF_T5_CONTROL));
+    proto_register_field_array(PROTO_T5, HF_T5_BULK, array_length(HF_T5_BULK));
+    proto_register_field_array(PROTO_T5, HF_T5_BULK_FRAG, array_length(HF_T5_BULK_FRAG));
+
+    expert_module_t * expert = expert_register_protocol(PROTO_T5);
+    expert_register_field_array(expert, EI_T5_BULK, array_length(EI_T5_BULK));
 
     T5_HANDLE = register_dissector("trigger5", dissect_t5, PROTO_T5);
 }
