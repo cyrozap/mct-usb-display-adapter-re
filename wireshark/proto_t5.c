@@ -418,8 +418,8 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
         return 0;
     }
 
-    proto_item * t6_tree_item = proto_tree_add_item(ptree, PROTO_T5, tvb, 0, -1, ENC_NA);
-    proto_tree * tree = proto_item_add_subtree(t6_tree_item, ETT_T5);
+    proto_item * t5_tree_item = proto_tree_add_item(ptree, PROTO_T5, tvb, 0, -1, ENC_NA);
+    proto_tree * tree = proto_item_add_subtree(t5_tree_item, ETT_T5);
 
     col_set_str(pinfo->cinfo, COL_PROTOCOL, "Trigger 5");
 
@@ -596,7 +596,7 @@ static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
     return tvb_captured_length(tvb);
 }
 
-static int dissect_t6(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data) {
+static int dissect_t5(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data) {
     usb_conv_info_t * usb_conv_info = (usb_conv_info_t *)data;
 
     switch (usb_conv_info->endpoint) {
@@ -622,7 +622,7 @@ void proto_register_trigger5(void) {
 
     proto_register_field_array(PROTO_T5, HF_T5_CONTROL, array_length(HF_T5_CONTROL));
 
-    T5_HANDLE = register_dissector("trigger5", dissect_t6, PROTO_T5);
+    T5_HANDLE = register_dissector("trigger5", dissect_t5, PROTO_T5);
 }
 
 void proto_reg_handoff_trigger5(void) {
