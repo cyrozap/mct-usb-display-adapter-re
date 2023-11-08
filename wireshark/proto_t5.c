@@ -697,7 +697,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
         /* OUT Setup */
         switch (bRequest) {
             case CTRL_REQ_C3:
-                {
+                if (wLength >= 35) {
                     int field_offset = 0;
                     for (int i = 0; i < array_length(video_mode_set_fields); i++) {
                         proto_item * item = proto_tree_add_item(tree, *video_mode_set_fields[i].hf, tvb, CTRL_SETUP_DATA_OFFSET+field_offset, video_mode_set_fields[i].size, ENC_BIG_ENDIAN);

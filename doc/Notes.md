@@ -29,6 +29,9 @@ value, and "0xYY" is the bRequest value.
 
  * 0x40, 0xc3: Set video mode/timings.
    * wValue: Index into the supported video modes array.
+   * wLength:
+     * 0: Standard video mode.
+     * 35: Custom video mode.
    * `>H`: Vertical resolution.
    * `>H`: Horizontal resolution.
    * `>H`: Line total pixels minus one.
