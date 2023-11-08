@@ -155,8 +155,8 @@ static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_FRAME_BACK_PORCH_MINUS_ONE = -1;
 static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_UNK_2 = -1;
 static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_UNK_3 = -1;
 static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_VERTICAL_RESOLUTION_MINUS_ONE = -1;
-static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_UNK_4 = -1;
 static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG = -1;
+static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_PRE_DIV = -1;
 static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_MUL0 = -1;
 static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_MUL1 = -1;
 static int HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_DIV0 = -1;
@@ -341,13 +341,13 @@ static hf_register_info HF_T5_CONTROL[] = {
         { "Vertical resolution minus one", "trigger5.control.video_mode.vertical_res_minus_one",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_UNK_4,
-        { "Unknown 4", "trigger5.control.video_mode.unk4",
-        FT_UINT8, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
-    },
     { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG,
         { "PLL configuration", "trigger5.control.video_mode.pll_config",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_PRE_DIV,
+        { "Pre-divider", "trigger5.control.video_mode.pll_config.pre_div",
+        FT_UINT8, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_MUL0,
         { "Multiplier 0", "trigger5.control.video_mode.pll_config.mul0",
@@ -398,8 +398,7 @@ static const field_sizes_t video_mode_set_fields[] = {
     { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_UNK_3, 2 },
     { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_VERTICAL_RESOLUTION_MINUS_ONE, 2 },
 
-    { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_UNK_4, 1 },
-    { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG, 4 },
+    { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG, 5 },
 
     { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_HORIZONTAL_SYNC_POLARITY, 1 },
     { &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_VERTICAL_SYNC_POLARITY, 1 },
@@ -705,16 +704,18 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
                         if (video_mode_set_fields[i].hf == &HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG) {
                             proto_tree * item_tree = proto_item_add_subtree(item, ETT_T5_VIDEO_MODE_PLL_CONFIG);
 
+                            uint32_t pre_div = 0;
+                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_PRE_DIV, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+0, 1, ENC_BIG_ENDIAN, &pre_div);
                             uint32_t mul0 = 0;
-                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_MUL0, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+0, 1, ENC_BIG_ENDIAN, &mul0);
+                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_MUL0, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+1, 1, ENC_BIG_ENDIAN, &mul0);
                             uint32_t mul1 = 0;
-                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_MUL1, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+1, 1, ENC_BIG_ENDIAN, &mul1);
+                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_MUL1, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+2, 1, ENC_BIG_ENDIAN, &mul1);
                             uint32_t div0 = 0;
-                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_DIV0, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+2, 1, ENC_BIG_ENDIAN, &div0);
+                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_DIV0, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+3, 1, ENC_BIG_ENDIAN, &div0);
                             uint32_t div1 = 0;
-                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_DIV1, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+3, 1, ENC_BIG_ENDIAN, &div1);
+                            proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_PLL_CONFIG_DIV1, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+4, 1, ENC_BIG_ENDIAN, &div1);
 
-                            double pll_freq_khz = 10e3 * mul0 * mul1 / div0 / div1;
+                            double pll_freq_khz = 10e3 / pre_div * mul0 * mul1 / div0 / div1;
                             proto_item_append_text(item, ": %.03f MHz pixel clock", pll_freq_khz/1e3);
                         }
                         field_offset += video_mode_set_fields[i].size;
