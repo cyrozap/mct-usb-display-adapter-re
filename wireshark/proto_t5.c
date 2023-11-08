@@ -659,6 +659,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
             } else {
                 proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_CONTROL_REQ_VIDEO_MODE_DETAILS_INDEX, tvb, 0, 0, wValue));
             }
+            break;
         case CTRL_REQ_A5:
         case CTRL_REQ_C4:
             if (setup_not_completion) {
