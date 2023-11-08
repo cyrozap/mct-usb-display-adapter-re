@@ -933,8 +933,11 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb
             /* Reassembled */
             col_append_str(pinfo->cinfo, COL_INFO, " (Packet Reassembled)");
         } else {
-            /* Failed to reassemble. This can happen when a packet captures less data than was reported, which
-                * seems to be common with captured firmware updates. */
+            /* Failed to reassemble. This can happen when a packet captures less data than was reported, which will
+             * always happen with bulk transfers greater than ~240 kB on Linux. The proprietary driver likes to send
+             * very large bulk transfers to the device, in the range of hundreds of kilobytes to several megabytes, so
+             * unless a special capture setup is used (e.g., a Linux kernel modified to capture very large USB packets,
+             * or a hardware USB analyzer) most fragmented video packets will fail to be reassembled. */
             col_append_fstr(pinfo->cinfo, COL_INFO, " (Fragment offset %u)", fragment_info->fragment_offset);
         }
     }
