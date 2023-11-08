@@ -171,15 +171,31 @@ static const value_string CURSOR_PIXEL_FORMATS[] = {
     { 0, NULL },
 };
 
+static const value_string VIDEO_TYPES[] = {
+    { 3, "Type 3" },
+    { 4, "Type 4" },
+    { 7, "Type 7" },
+    { 0, NULL },
+};
+
+static const value_string IMAGE_FORMATS[] = {
+    { 0x06, "NV12" },
+    { 0x09, "BGR24" },
+    { 0x0d, "JPEG" },
+    { 0, NULL },
+};
+
 static const true_false_string tfs_sync_polarity = { "Positive", "Negative" };
 static const true_false_string tfs_timing = { "Customer", "Standard" };
 
 static dissector_handle_t T6_HANDLE = NULL;
+static dissector_handle_t T6_VIDEO_HANDLE = NULL;
 
 static reassembly_table T6_REASSEMBLY_TABLE = { 0 };
 static reassembly_table T6_CONTROL_CURSOR_UPLOAD_REASSEMBLY_TABLE = { 0 };
 
 static int PROTO_T6 = -1;
+static int PROTO_T6_VIDEO = -1;
 
 static int HF_T6_CONTROL_REQ = -1;
 
@@ -823,6 +839,90 @@ static hf_register_info HF_T6_BULK_FRAG[] = {
     },
 };
 
+static int HF_T6_VIDEO_TYPE = -1;
+static int HF_T6_VIDEO_DATA_LEN = -1;
+static int HF_T6_VIDEO_SEQ = -1;
+static int HF_T6_VIDEO_UNK_3 = -1;
+static int HF_T6_VIDEO_UNK_4_0 = -1;
+static int HF_T6_VIDEO_UNK_4_1 = -1;
+static int HF_T6_VIDEO_UNK_4_2 = -1;
+static int HF_T6_VIDEO_UNK_4_3 = -1;
+static int HF_T6_VIDEO_UNK_5 = -1;
+static int HF_T6_VIDEO_UNK_6 = -1;
+static int HF_T6_VIDEO_UNK_7 = -1;
+static int HF_T6_VIDEO_IMAGE_FORMAT = -1;
+static int HF_T6_VIDEO_UNK_9 = -1;
+static int HF_T6_VIDEO_UNK_10 = -1;
+static int HF_T6_VIDEO_UNK_11 = -1;
+static int HF_T6_VIDEO_DATA = -1;
+
+static hf_register_info HF_T6_VIDEO[] = {
+    { &HF_T6_VIDEO_TYPE,
+        { "Type", "trigger6.video.type",
+        FT_UINT32, BASE_DEC, VALS(VIDEO_TYPES), 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_DATA_LEN,
+        { "Data length", "trigger6.video.data_len",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_SEQ,
+        { "Sequence number", "trigger6.video.seq",
+        FT_UINT32, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_3,
+        { "Unknown 3", "trigger6.video.unk3",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_4_0,
+        { "Top-right corner X", "trigger6.video.type7.x",
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_4_1,
+        { "Top-right corner Y", "trigger6.video.type7.y",
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_4_2,
+        { "Unknown 4-2", "trigger6.video.unk42",
+        FT_UINT16, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_4_3,
+        { "Unknown 4-3", "trigger6.video.unk43",
+        FT_UINT16, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_5,
+        { "Unknown 5", "trigger6.video.unk5",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_6,
+        { "Unknown 6", "trigger6.video.unk6",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_7,
+        { "Unknown 7", "trigger6.video.unk7",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_IMAGE_FORMAT,
+        { "Image format", "trigger6.video.format",
+        FT_UINT32, BASE_HEX_DEC, VALS(IMAGE_FORMATS), 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_9,
+        { "Unknown 9", "trigger6.video.unk9",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_10,
+        { "Unknown 10", "trigger6.video.unk10",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_UNK_11,
+        { "Unknown 11", "trigger6.video.unk11",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_VIDEO_DATA,
+        { "Data", "trigger6.video.data",
+        FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+};
+
 typedef struct field_sizes_s {
     int * hf;
     int size;
@@ -846,6 +946,39 @@ static const field_sizes_t video_mode_fields[] = {
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS, 1 },
 };
 
+static const field_sizes_t video_fields_common[] = {
+    { &HF_T6_VIDEO_TYPE, 4 },
+    { &HF_T6_VIDEO_DATA_LEN, 4 },
+    { &HF_T6_VIDEO_SEQ, 4 },
+    { &HF_T6_VIDEO_UNK_3, 4 },
+};
+
+static const field_sizes_t video_fields_types34[] = {
+    { &HF_T6_VIDEO_UNK_4_2, 2 },
+    { &HF_T6_VIDEO_UNK_4_3, 2 },
+    { &HF_T6_VIDEO_UNK_5, 4 },
+    { &HF_T6_VIDEO_UNK_6, 4 },
+    { &HF_T6_VIDEO_UNK_7, 4 },
+    { &HF_T6_VIDEO_IMAGE_FORMAT, 4 },
+    { &HF_T6_VIDEO_UNK_9, 4 },
+    { &HF_T6_VIDEO_UNK_10, 4 },
+    { &HF_T6_VIDEO_UNK_11, 4 },
+};
+
+static const field_sizes_t video_fields_type7[] = {
+    { &HF_T6_VIDEO_UNK_4_0, 2 },
+    { &HF_T6_VIDEO_UNK_4_1, 2 },
+    { &HF_T6_VIDEO_UNK_4_2, 2 },
+    { &HF_T6_VIDEO_UNK_4_3, 2 },
+    { &HF_T6_VIDEO_UNK_5, 4 },
+    { &HF_T6_VIDEO_UNK_6, 4 },
+    { &HF_T6_VIDEO_UNK_7, 4 },
+    { &HF_T6_VIDEO_IMAGE_FORMAT, 4 },
+    { &HF_T6_VIDEO_UNK_9, 4 },
+    // { &HF_T6_VIDEO_UNK_10, 4 },
+    { &HF_T6_VIDEO_UNK_11, 4 },
+};
+
 static int ETT_T6 = -1;
 static int ETT_T6_VIDEO_MODES = -1;
 static int ETT_T6_VIDEO_MODE = -1;
@@ -857,6 +990,7 @@ static int ETT_T6_CONF_INFO_DISPLAY_FUNCTION = -1;
 static int ETT_T6_CONF_INFO_DISP0_CAPS = -1;
 static int ETT_T6_CONF_INFO_DISP1_CAPS = -1;
 static int ETT_T6_CONF_INFO_DISPLAY_INTERFACE = -1;
+static int ETT_T6_VIDEO = -1;
 static int * const ETT[] = {
     &ETT_T6,
     &ETT_T6_VIDEO_MODES,
@@ -873,6 +1007,7 @@ static int * const ETT[] = {
     &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS,
     &ETT_T6_BULK_FRAGMENT,
     &ETT_T6_BULK_FRAGMENTS,
+    &ETT_T6_VIDEO,
 };
 
 static void dissect_cursor_upload(proto_tree *tree, tvbuff_t *tvb, packet_info *pinfo, uint16_t cursor_index, uint16_t cursor_data_byte_offset) {
@@ -1016,6 +1151,45 @@ static void dissect_video_mode(proto_tree *tree, tvbuff_t *tvb) {
 
     double refresh_rate_hz_actual = (pll_freq_khz*1e3) / clocks_per_frame;
     proto_item_append_text(video_mode_item, ": %d x %d @ %d Hz (%.5g Hz)", h_res, v_res, refresh_rate_hz_reported, refresh_rate_hz_actual);
+}
+
+static int dissect_t6_video(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data) {
+    proto_item * video_tree_item = proto_tree_add_item(tree, PROTO_T6_VIDEO, tvb, 0, -1, ENC_NA);
+    proto_tree * video_tree = proto_item_add_subtree(video_tree_item, ETT_T6_VIDEO);
+
+    int field_offset = 0;
+    for (int i = 0; i < array_length(video_fields_common); i++) {
+        proto_tree_add_item(video_tree, *video_fields_common[i].hf, tvb, field_offset, video_fields_common[i].size, ENC_LITTLE_ENDIAN);
+        field_offset += video_fields_common[i].size;
+    }
+
+    uint32_t type = tvb_get_letohl(tvb, 0);
+    switch (type) {
+        case 3:
+        case 4:
+            {
+                for (int i = 0; i < array_length(video_fields_types34); i++) {
+                    proto_tree_add_item(video_tree, *video_fields_types34[i].hf, tvb, field_offset, video_fields_types34[i].size, ENC_LITTLE_ENDIAN);
+                    field_offset += video_fields_types34[i].size;
+                }
+            }
+            break;
+        case 7:
+            {
+                for (int i = 0; i < array_length(video_fields_type7); i++) {
+                    proto_tree_add_item(video_tree, *video_fields_type7[i].hf, tvb, field_offset, video_fields_type7[i].size, ENC_LITTLE_ENDIAN);
+                    field_offset += video_fields_type7[i].size;
+                }
+            }
+            break;
+        default:
+            break;
+    }
+
+    uint32_t length = tvb_get_letohl(tvb, 4);
+    proto_tree_add_item(video_tree, HF_T6_VIDEO_DATA, tvb, 0x30, length, ENC_NA);
+
+    return tvb_captured_length(tvb);
 }
 
 static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
@@ -1230,7 +1404,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
     return tvb_captured_length(tvb);
 }
 
-static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
+static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, proto_tree *parent_tree, urb_info_t *urb) {
     if (urb->direction) {
         /* BULK 1 IN */
     } else if (!urb->direction) {
@@ -1352,7 +1526,14 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_
             }
 
             if (next_tvb) {
-                proto_tree_add_item(tree, HF_T6_BULK_SESSION_PAYLOAD_DATA, next_tvb, 0, -1, ENC_NA);
+                switch (selector_info->session_num) {
+                    case 0:
+                        call_dissector(T6_VIDEO_HANDLE, next_tvb, pinfo, parent_tree);
+                        break;
+                    default:
+                        proto_tree_add_item(tree, HF_T6_BULK_SESSION_PAYLOAD_DATA, next_tvb, 0, -1, ENC_NA);
+                        break;
+                }
             }
         }
     } else {
@@ -1384,7 +1565,7 @@ static int dissect_t6(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void 
         case URB_CONTROL:
             return handle_control(tvb, pinfo, t6_tree, urb);
         case URB_BULK:
-            return handle_bulk(tvb, pinfo, t6_tree, urb);
+            return handle_bulk(tvb, pinfo, t6_tree, tree, urb);
         case URB_INTERRUPT:
             return handle_interrupt(tvb, pinfo, t6_tree, urb);
         default:
@@ -1410,6 +1591,16 @@ void proto_register_trigger6(void) {
     proto_register_field_array(PROTO_T6, HF_T6_BULK_FRAG, array_length(HF_T6_BULK_FRAG));
 
     T6_HANDLE = register_dissector("trigger6", dissect_t6, PROTO_T6);
+
+    PROTO_T6_VIDEO = proto_register_protocol(
+        "Magic Control Technology Trigger 6 Video",
+        "MCT T6 Video",
+        "trigger6.video"
+    );
+
+    proto_register_field_array(PROTO_T6_VIDEO, HF_T6_VIDEO, array_length(HF_T6_VIDEO));
+
+    T6_VIDEO_HANDLE = register_dissector("trigger6.video", dissect_t6_video, PROTO_T6_VIDEO);
 }
 
 void proto_reg_handoff_trigger6(void) {
