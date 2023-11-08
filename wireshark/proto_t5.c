@@ -739,7 +739,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
                             proto_tree_add_item_ret_uint(item_tree, HF_T5_CONTROL_REQ_SET_VIDEO_MODE_CUSTOM_PLL_CONFIG_DIV1, tvb, CTRL_SETUP_DATA_OFFSET+field_offset+4, 1, ENC_BIG_ENDIAN, &div1);
 
                             pll_freq_khz = 10e3 / pre_div * mul0 * mul1 / div0 / div1;
-                            proto_item_append_text(item, ": %.03f MHz pixel clock", pll_freq_khz/1e3);
+                            proto_item_append_text(item, ": %.5g MHz pixel clock", pll_freq_khz/1e3);
                         }
 
                         field_offset += set_video_mode_fields[i].size;
