@@ -221,87 +221,87 @@ static hf_register_info HF_T6_CONTROL[] = {
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE,
-        { "Video mode data", "trigger6.control.video_modes.video_mode",
+        { "Video mode data", "trigger6.control.video_mode",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PIXEL_CLK_KHZ,
-        { "Pixel clock (kHz)", "trigger6.control.video_modes.video_mode.pixel_clk_khz",
+        { "Pixel clock (kHz)", "trigger6.control.video_mode.pixel_clk_khz",
         FT_UINT32, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_REFRESH_RATE_HZ,
-        { "Refresh rate (HZ)", "trigger6.control.video_modes.video_mode.refresh_rate_hz",
+        { "Refresh rate (HZ)", "trigger6.control.video_mode.refresh_rate_hz",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_TOTAL_PIXELS,
-        { "Line total pixels", "trigger6.control.video_modes.video_mode.line_total_pixels",
+        { "Line total pixels", "trigger6.control.video_mode.line_total_pixels",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_ACTIVE_PIXELS,
-        { "Line active pixels", "trigger6.control.video_modes.video_mode.line_active_pixels",
+        { "Line active pixels", "trigger6.control.video_mode.line_active_pixels",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_ACTIVE_PLUS_FRONT_PORCH_PIXELS,
-        { "Line active plus front porch pixels", "trigger6.control.video_modes.video_mode.line_active_plus_front_porch_pixels",
+        { "Line active plus front porch pixels", "trigger6.control.video_mode.line_active_plus_front_porch_pixels",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_SYNC_WIDTH,
-        { "Line sync width", "trigger6.control.video_modes.video_mode.line_sync_width",
+        { "Line sync width", "trigger6.control.video_mode.line_sync_width",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_TOTAL_LINES,
-        { "Frame total lines", "trigger6.control.video_modes.video_mode.frame_total_lines",
+        { "Frame total lines", "trigger6.control.video_mode.frame_total_lines",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_LINES,
-        { "Frame active lines", "trigger6.control.video_modes.video_mode.frame_active_lines",
+        { "Frame active lines", "trigger6.control.video_mode.frame_active_lines",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_PLUS_FRONT_PORCH_LINES,
-        { "Frame active plus front porch lines", "trigger6.control.video_modes.video_mode.frame_active_plus_front_porch_lines",
+        { "Frame active plus front porch lines", "trigger6.control.video_mode.frame_active_plus_front_porch_lines",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_SYNC_WIDTH,
-        { "Frame sync width", "trigger6.control.video_modes.video_mode.frame_sync_width",
+        { "Frame sync width", "trigger6.control.video_mode.frame_sync_width",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG,
-        { "Pixel clock PLL configuration", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config",
+        { "Pixel clock PLL configuration", "trigger6.control.video_mode.pixel_clock_pll_config",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_OFFSET,
-        { "Offset", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.offset",
+        { "Offset", "trigger6.control.video_mode.pixel_clock_pll_config.offset",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL0,
-        { "Multiplier 0", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul0",
+        { "Multiplier 0", "trigger6.control.video_mode.pixel_clock_pll_config.mul0",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1,
-        { "Multiplier 1", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul1",
+        { "Multiplier 1", "trigger6.control.video_mode.pixel_clock_pll_config.mul1",
         FT_UINT8, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2,
-        { "Multiplier 2", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul2",
+        { "Multiplier 2", "trigger6.control.video_mode.pixel_clock_pll_config.mul2",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN,
-        { "x2 multiplier enabled", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul2.x2_en",
+        { "x2 multiplier enabled", "trigger6.control.video_mode.pixel_clock_pll_config.mul2.x2_en",
         FT_BOOLEAN, 8, NULL, 0x02, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN,
-        { "x4 multiplier enabled", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul2.x4_en",
+        { "x4 multiplier enabled", "trigger6.control.video_mode.pixel_clock_pll_config.mul2.x4_en",
         FT_BOOLEAN, 8, NULL, 0x01, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_0,
-        { "Sync polarity 0", "trigger6.control.video_modes.video_mode.sync_polarity_0",
+        { "Sync polarity 0", "trigger6.control.video_mode.sync_polarity_0",
         FT_BOOLEAN, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_1,
-        { "Sync polarity 1", "trigger6.control.video_modes.video_mode.sync_polarity_1",
+        { "Sync polarity 1", "trigger6.control.video_mode.sync_polarity_1",
         FT_BOOLEAN, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11,
-        { "Unknown 11", "trigger6.control.video_modes.video_mode.unk11",
+        { "Unknown 11", "trigger6.control.video_mode.unk11",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_INFO_FIELD_IDX,
