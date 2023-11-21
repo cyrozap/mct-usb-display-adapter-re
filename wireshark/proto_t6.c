@@ -149,9 +149,13 @@ static int HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_TOTAL_LINES = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_LINES = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_PLUS_FRONT_PORCH_LINES = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_SYNC_WIDTH = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_8 = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_9 = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_10 = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_OFFSET = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL0 = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1 = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2 = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_0 = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_1 = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11 = -1;
@@ -260,17 +264,33 @@ static hf_register_info HF_T6_CONTROL[] = {
         { "Frame sync width", "trigger6.control.video_modes.video_mode.frame_sync_width",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_8,
-        { "Unknown 8", "trigger6.control.video_modes.video_mode.unk8",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG,
+        { "Pixel clock PLL configuration", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_OFFSET,
+        { "Offset", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.offset",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_9,
-        { "Unknown 9", "trigger6.control.video_modes.video_mode.unk9",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL0,
+        { "Multiplier 0", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul0",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_10,
-        { "Unknown 10", "trigger6.control.video_modes.video_mode.unk10",
-        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1,
+        { "Multiplier 1", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul1",
+        FT_UINT8, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2,
+        { "Multiplier 2", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul2",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN,
+        { "x2 multiplier enabled", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul2.x2_en",
+        FT_BOOLEAN, 8, NULL, 0x02, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN,
+        { "x4 multiplier enabled", "trigger6.control.video_modes.video_mode.pixel_clock_pll_config.mul2.x4_en",
+        FT_BOOLEAN, 8, NULL, 0x01, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_0,
         { "Sync polarity 0", "trigger6.control.video_modes.video_mode.sync_polarity_0",
@@ -479,9 +499,7 @@ static const field_sizes_t video_mode_fields[] = {
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_LINES, 2 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_PLUS_FRONT_PORCH_LINES, 2 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_SYNC_WIDTH, 2 },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_8, 2 },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_9, 2 },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_10, 2 },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG, 6 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_0, 1 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_1, 1 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11, 2 },
@@ -490,13 +508,58 @@ static const field_sizes_t video_mode_fields[] = {
 static int ETT_T6 = -1;
 static int ETT_T6_VIDEO_MODES = -1;
 static int ETT_T6_VIDEO_MODE = -1;
+static int ETT_T6_VIDEO_MODE_PLL_CONFIG = -1;
+static int ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL2 = -1;
 static int * const ETT[] = {
     &ETT_T6,
     &ETT_T6_VIDEO_MODES,
     &ETT_T6_VIDEO_MODE,
+    &ETT_T6_VIDEO_MODE_PLL_CONFIG,
+    &ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL2,
     &ETT_T6_BULK_FRAGMENT,
     &ETT_T6_BULK_FRAGMENTS,
 };
+
+static double dissect_pll_config(proto_item *item, tvbuff_t *tvb) {
+    double pll_freq_khz = 0;
+
+    proto_tree * item_tree = proto_item_add_subtree(item, ETT_T6_VIDEO_MODE_PLL_CONFIG);
+
+    uint32_t freq_offset = 0;
+    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_OFFSET, tvb, 0, 2, ENC_LITTLE_ENDIAN, &freq_offset);
+
+    uint32_t mul0 = 0;
+    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL0, tvb, 2, 2, ENC_LITTLE_ENDIAN, &mul0);
+
+    uint32_t mul1 = 0;
+    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1, tvb, 4, 1, ENC_LITTLE_ENDIAN, &mul1);
+
+    proto_item * mul2_item = proto_tree_add_item(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2, tvb, 5, 1, ENC_NA);
+    proto_tree * mul2_tree = proto_item_add_subtree(mul2_item, ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL2);
+
+    gboolean x2_en = false;
+    proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x2_en);
+
+    gboolean x4_en = false;
+    proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x4_en);
+
+    uint32_t mul2 = 1;
+
+    if (x2_en) {
+        mul2 *= 2;
+    }
+
+    if (x4_en) {
+        mul2 *= 4;
+    }
+
+    proto_item_append_text(mul2_item, ": %d", mul2);
+
+    pll_freq_khz = (freq_offset + mul0 * mul1) * mul2 * 1.25;
+    proto_item_append_text(item, ": %.5g MHz", pll_freq_khz/1e3);
+
+    return pll_freq_khz;
+}
 
 static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
     gboolean in_not_out = usb_conv_info->direction != 0;
@@ -576,7 +639,12 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                 {
                     int field_offset = 0;
                     for (int i = 0; i < array_length(video_mode_fields); i++) {
-                        proto_tree_add_item(tree, *video_mode_fields[i].hf, tvb, CTRL_SETUP_DATA_OFFSET+field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
+                        proto_item * item = proto_tree_add_item(tree, *video_mode_fields[i].hf, tvb, CTRL_SETUP_DATA_OFFSET+field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
+
+                        if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
+                            dissect_pll_config(item, tvb_new_subset_length(tvb, CTRL_SETUP_DATA_OFFSET+field_offset, 6));
+                        }
+
                         field_offset += video_mode_fields[i].size;
                     }
                 }
@@ -598,7 +666,12 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
 
                         int field_offset = 0;
                         for (int i = 0; i < array_length(video_mode_fields); i++) {
-                            proto_tree_add_item(video_mode_tree, *video_mode_fields[i].hf, tvb, offset+field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
+                            proto_item * item = proto_tree_add_item(video_mode_tree, *video_mode_fields[i].hf, tvb, offset+field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
+
+                            if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
+                                dissect_pll_config(item, tvb_new_subset_length(tvb, offset+field_offset, 6));
+                            }
+
                             field_offset += video_mode_fields[i].size;
                         }
                     }
