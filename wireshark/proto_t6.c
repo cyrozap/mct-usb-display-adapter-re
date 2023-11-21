@@ -565,16 +565,35 @@ static void dissect_video_mode(proto_tree *tree, tvbuff_t *tvb) {
     proto_item * video_mode_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_MODE, tvb, 0, 32, ENC_NA);
     proto_tree * video_mode_tree = proto_item_add_subtree(video_mode_item, ETT_T6_VIDEO_MODE);
 
+    uint32_t refresh_rate_hz_reported = 0;
+    uint32_t clocks_per_frame = 1;
+    uint32_t h_res = 0;
+    uint32_t v_res = 0;
+    double pll_freq_khz = 0;
+
     int field_offset = 0;
     for (int i = 0; i < array_length(video_mode_fields); i++) {
         proto_item * item = proto_tree_add_item(video_mode_tree, *video_mode_fields[i].hf, tvb, field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
 
-        if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
-            dissect_pll_config(item, tvb_new_subset_length(tvb, field_offset, 6));
+        if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_REFRESH_RATE_HZ) {
+            refresh_rate_hz_reported = tvb_get_letohs(tvb, field_offset);
+        } else if (
+            (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_TOTAL_PIXELS) ||
+            (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_TOTAL_LINES)) {
+            clocks_per_frame *= tvb_get_letohs(tvb, field_offset);
+        } else if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_ACTIVE_PIXELS) {
+            h_res = tvb_get_letohs(tvb, field_offset);
+        } else if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_LINES) {
+            v_res = tvb_get_letohs(tvb, field_offset);
+        } else if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
+            pll_freq_khz = dissect_pll_config(item, tvb_new_subset_length(tvb, field_offset, 6));
         }
 
         field_offset += video_mode_fields[i].size;
     }
+
+    double refresh_rate_hz_actual = (pll_freq_khz*1e3) / clocks_per_frame;
+    proto_item_append_text(video_mode_item, ": %d x %d @ %d Hz (%.5g Hz)", h_res, v_res, refresh_rate_hz_reported, refresh_rate_hz_actual);
 }
 
 static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
