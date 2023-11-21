@@ -561,6 +561,19 @@ static double dissect_pll_config(proto_item *item, tvbuff_t *tvb) {
     return pll_freq_khz;
 }
 
+static void dissect_video_mode(proto_tree *tree, tvbuff_t *tvb) {
+    int field_offset = 0;
+    for (int i = 0; i < array_length(video_mode_fields); i++) {
+        proto_item * item = proto_tree_add_item(tree, *video_mode_fields[i].hf, tvb, field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
+
+        if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
+            dissect_pll_config(item, tvb_new_subset_length(tvb, field_offset, 6));
+        }
+
+        field_offset += video_mode_fields[i].size;
+    }
+}
+
 static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
     gboolean in_not_out = usb_conv_info->direction != 0;
     gboolean setup_not_completion = usb_conv_info->is_setup;
@@ -636,18 +649,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
         // printf("CONTROL OUT: 0x%02x\n", bRequest);
         switch (bRequest) {
             case 0x12:
-                {
-                    int field_offset = 0;
-                    for (int i = 0; i < array_length(video_mode_fields); i++) {
-                        proto_item * item = proto_tree_add_item(tree, *video_mode_fields[i].hf, tvb, CTRL_SETUP_DATA_OFFSET+field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
-
-                        if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
-                            dissect_pll_config(item, tvb_new_subset_length(tvb, CTRL_SETUP_DATA_OFFSET+field_offset, 6));
-                        }
-
-                        field_offset += video_mode_fields[i].size;
-                    }
-                }
+                dissect_video_mode(tree, tvb_new_subset_length(tvb, CTRL_SETUP_DATA_OFFSET, 32));
                 break;
         }
     } else if (in_not_out && !setup_not_completion) {
@@ -664,16 +666,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                         proto_item * video_mode_item = proto_tree_add_item(video_modes_tree, HF_T6_CONTROL_REQ_VIDEO_MODE, tvb, offset, 32, ENC_NA);
                         proto_tree * video_mode_tree = proto_item_add_subtree(video_mode_item, ETT_T6_VIDEO_MODE);
 
-                        int field_offset = 0;
-                        for (int i = 0; i < array_length(video_mode_fields); i++) {
-                            proto_item * item = proto_tree_add_item(video_mode_tree, *video_mode_fields[i].hf, tvb, offset+field_offset, video_mode_fields[i].size, ENC_LITTLE_ENDIAN);
-
-                            if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
-                                dissect_pll_config(item, tvb_new_subset_length(tvb, offset+field_offset, 6));
-                            }
-
-                            field_offset += video_mode_fields[i].size;
-                        }
+                        dissect_video_mode(video_mode_tree, tvb_new_subset_length(tvb, offset, 32));
                     }
                 }
                 break;
