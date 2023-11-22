@@ -118,6 +118,8 @@ static const value_string CONF_TYPES[] = {
     { 0, NULL },
 };
 
+static const true_false_string tfs_sync_polarity = { "Positive", "Negative" };
+
 static dissector_handle_t T6_HANDLE = NULL;
 
 static reassembly_table T6_REASSEMBLY_TABLE = { 0 };
@@ -156,8 +158,8 @@ static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1 = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2 = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_0 = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_1 = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11 = -1;
 
 static int HF_T6_CONTROL_REQ_INFO_FIELD_IDX = -1;
@@ -292,13 +294,13 @@ static hf_register_info HF_T6_CONTROL[] = {
         { "x4 multiplier enabled", "trigger6.control.video_mode.pixel_clock_pll_config.mul2.x4_en",
         FT_BOOLEAN, 8, NULL, 0x01, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_0,
-        { "Sync polarity 0", "trigger6.control.video_mode.sync_polarity_0",
-        FT_BOOLEAN, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY,
+        { "Horizontal sync polarity", "trigger6.control.video_mode.horizontal_sync_polarity",
+        FT_BOOLEAN, BASE_DEC, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_1,
-        { "Sync polarity 1", "trigger6.control.video_mode.sync_polarity_1",
-        FT_BOOLEAN, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY,
+        { "Vertical sync polarity", "trigger6.control.video_mode.vertical_sync_polarity",
+        FT_BOOLEAN, BASE_DEC, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11,
         { "Unknown 11", "trigger6.control.video_mode.unk11",
@@ -500,8 +502,8 @@ static const field_sizes_t video_mode_fields[] = {
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_PLUS_FRONT_PORCH_LINES, 2 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_SYNC_WIDTH, 2 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG, 6 },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_0, 1 },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_SYNC_POLARITY_1, 1 },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY, 1 },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY, 1 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11, 2 },
 };
 
