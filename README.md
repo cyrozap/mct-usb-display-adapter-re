@@ -71,7 +71,7 @@ See [doc/Notes.md](doc/Notes.md).
      * 1080p60
  * [StarTech USB32DPES2][usb32dpes2]
    * MCT Trigger VI T6-688L
-   * 64 MB RAM
+   * 64 MB RAM (external)
    * DP output
      * 4k30
  * [j5create JCD543][jcd543]
@@ -81,7 +81,7 @@ See [doc/Notes.md](doc/Notes.md).
      * 4k30
  * [StarTech USB32HD2][usb32hd2] / j5create [JUA365][jua365]/[JCA365][jca365]
    * MCT Trigger VI T6-688SL
-   * 64 MB RAM
+   * 64 MB RAM (integrated)
    * Silicon Image Sil9136-3
    * Dual HDMI outputs
      * 1x 4k30
@@ -90,6 +90,7 @@ See [doc/Notes.md](doc/Notes.md).
    * Genesys Logic USB Hub
    * 2x of each:
      * MCT Trigger VI T6-688SL
+     * 64 MB RAM (integrated)
      * ITE IT66121
    * Quad HDMI outputs
      * 4x 1080p60
