@@ -87,8 +87,10 @@ See [doc/Notes.md](doc/Notes.md).
      * 1x 4k30
      * 1x 1080p60
  * StarTech [USB32HD4][usb32hd4]/[USBC2HD4][usbc2hd4] / [j5create JCA366][jca366]
-   * MCT Trigger VI T6-688SL
-   * ITE IT66121
+   * Genesys Logic USB Hub
+   * 2x of each:
+     * MCT Trigger VI T6-688SL
+     * ITE IT66121
    * Quad HDMI outputs
      * 4x 1080p60
 
