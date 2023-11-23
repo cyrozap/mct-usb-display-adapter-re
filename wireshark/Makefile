@@ -16,8 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-CFLAGS := $(shell pkg-config --cflags glib-2.0) -I/usr/include/wireshark -std=c17 -fPIC -Wall -Wpedantic -Werror -O2
-LDFLAGS := -lwireshark
+CFLAGS := $(shell pkg-config --cflags wireshark) -std=c17 -fPIC -Wall -Wpedantic -Werror -O2
+LDFLAGS := $(shell pkg-config --libs wireshark)
 
 
 all: mct_trigger.so
