@@ -34,6 +34,7 @@ install: mct_trigger.so
 	install -Dm755 $< $(PLUGINS_DIRECTORY)/$<
 
 link: mct_trigger.so
+	install -dm755 $(PLUGINS_DIRECTORY)
 	ln -s $(CURDIR)/$< $(PLUGINS_DIRECTORY)/$<
 
 clean:
