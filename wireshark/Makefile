@@ -21,12 +21,14 @@ LDFLAGS := $(shell pkg-config --libs wireshark)
 
 PLUGINS_VERSION = $(shell basename $(shell pkg-config --variable plugindir wireshark))
 PLUGINS_DIRECTORY = $(HOME)/.local/lib/wireshark/plugins/$(PLUGINS_VERSION)/epan
+PLUGIN_WANT_MAJOR = $(word 1,$(subst ., ,$(PLUGINS_VERSION)))
+PLUGIN_WANT_MINOR = $(word 2,$(subst ., ,$(PLUGINS_VERSION)))
 
 
 all: mct_trigger.so
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -D PLUGIN_WANT_MAJOR=$(PLUGIN_WANT_MAJOR) -D PLUGIN_WANT_MINOR=$(PLUGIN_WANT_MINOR) -c -o $@ $<
 
 mct_trigger.so: plugin.o proto_t5.o proto_t6.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o $@ $^
