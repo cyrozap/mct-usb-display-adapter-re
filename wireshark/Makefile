@@ -19,6 +19,8 @@
 CFLAGS := $(shell pkg-config --cflags wireshark) -std=c17 -fPIC -Wall -Wpedantic -Werror -O2
 LDFLAGS := $(shell pkg-config --libs wireshark)
 
+PLUGINS_DIRECTORY = $(HOME)/.local/lib/wireshark/plugins/4.0/epan
+
 
 all: mct_trigger.so
 
@@ -29,10 +31,10 @@ mct_trigger.so: plugin.o proto_t5.o proto_t6.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o $@ $^
 
 install: mct_trigger.so
-	install -Dm755 $< $(HOME)/.local/lib/wireshark/plugins/4.0/epan/$<
+	install -Dm755 $< $(PLUGINS_DIRECTORY)/$<
 
 link: mct_trigger.so
-	ln -s $(CURDIR)/$< $(HOME)/.local/lib/wireshark/plugins/4.0/epan/$<
+	ln -s $(CURDIR)/$< $(PLUGINS_DIRECTORY)/$<
 
 clean:
 	rm -f *.o *.so
