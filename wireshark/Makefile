@@ -19,7 +19,8 @@
 CFLAGS := $(shell pkg-config --cflags wireshark) -std=c17 -fPIC -Wall -Wpedantic -Werror -O2
 LDFLAGS := $(shell pkg-config --libs wireshark)
 
-PLUGINS_DIRECTORY = $(HOME)/.local/lib/wireshark/plugins/4.0/epan
+PLUGINS_VERSION = $(shell basename $(shell pkg-config --variable plugindir wireshark))
+PLUGINS_DIRECTORY = $(HOME)/.local/lib/wireshark/plugins/$(PLUGINS_VERSION)/epan
 
 
 all: mct_trigger.so
