@@ -9,6 +9,22 @@
      capture files.
 
 
+## Hardware/Firmware
+
+
+### Trigger 5
+
+ * Unknown 8-bit or 16-bit CPU
+ * No firmware updates available.
+ * Can't extract firmware without destroying device.
+
+
+### Trigger 6
+
+ * Andes NDS32 CPU
+ * Firmware is based on the μC/OS-II RTOS.
+
+
 ## Protocol
 
 
