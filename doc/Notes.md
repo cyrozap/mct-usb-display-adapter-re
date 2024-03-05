@@ -4,9 +4,11 @@
 ## Prior reverse engineering/driver development efforts
 
  * [DC11011100/jua365-driver: Reverse Engineering Effort for JUA365 (2x HDMI-to-USB 3.0 Adapter)][jua365-driver]
-   * Unfortunately, the repo was taken offline at some point, and the Internet
-     Archive only captured the landing page and not any of the source code or
-     capture files.
+   * This repo contains a USB packet capture of the proprietary driver querying
+     a Trigger 6 device, as well as a prototype of a tool that is intended to
+     replay captured USB data.
+   * The prototype replay tool appears to only be able to find and open the
+     device using libusb, and is missing the data replay functionality.
 
 
 ## Hardware/Firmware
@@ -361,5 +363,5 @@ Each packet is 64 bytes long.
      * Packet type 0x80: 0x00010000 through 0x00120000, inclusive
 
 
-[jua365-driver]: https://web.archive.org/web/20210328021458/https://github.com/DC11011100/jua365-driver
+[jua365-driver]: https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/DC11011100/jua365-driver
 [t6img]: ../mct_t6img.ksy
