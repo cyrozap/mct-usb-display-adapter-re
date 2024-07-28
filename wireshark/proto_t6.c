@@ -158,12 +158,12 @@ static int HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_LINES = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_ACTIVE_PLUS_FRONT_PORCH_LINES = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FRAME_SYNC_WIDTH = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_OFFSET = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL0 = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1 = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2 = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_FNUM = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_FDEN = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_IDIV = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X2_EN = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X4_EN = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11 = -1;
@@ -276,28 +276,28 @@ static hf_register_info HF_T6_CONTROL[] = {
         { "Pixel clock PLL configuration", "trigger6.control.video_mode.pixel_clock_pll_config",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_OFFSET,
-        { "Offset", "trigger6.control.video_mode.pixel_clock_pll_config.offset",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_FNUM,
+        { "Fractional Numerator (PLL P)", "trigger6.control.video_mode.pixel_clock_pll_config.fnum",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL0,
-        { "Multiplier 0", "trigger6.control.video_mode.pixel_clock_pll_config.mul0",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_FDEN,
+        { "Fractional Denominator (PLL Q)", "trigger6.control.video_mode.pixel_clock_pll_config.fden",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1,
-        { "Multiplier 1", "trigger6.control.video_mode.pixel_clock_pll_config.mul1",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_IDIV,
+        { "Integer Divisor (PLL N)", "trigger6.control.video_mode.pixel_clock_pll_config.idiv",
         FT_UINT8, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2,
-        { "Multiplier 2", "trigger6.control.video_mode.pixel_clock_pll_config.mul2",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL,
+        { "Multiplier", "trigger6.control.video_mode.pixel_clock_pll_config.mul",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN,
-        { "x2 multiplier enabled", "trigger6.control.video_mode.pixel_clock_pll_config.mul2.x2_en",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X2_EN,
+        { "x2 multiplier enabled", "trigger6.control.video_mode.pixel_clock_pll_config.mul.x2_en",
         FT_BOOLEAN, 8, NULL, 0x02, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN,
-        { "x4 multiplier enabled", "trigger6.control.video_mode.pixel_clock_pll_config.mul2.x4_en",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X4_EN,
+        { "x4 multiplier enabled", "trigger6.control.video_mode.pixel_clock_pll_config.mul.x4_en",
         FT_BOOLEAN, 8, NULL, 0x01, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY,
@@ -517,13 +517,13 @@ static int ETT_T6 = -1;
 static int ETT_T6_VIDEO_MODES = -1;
 static int ETT_T6_VIDEO_MODE = -1;
 static int ETT_T6_VIDEO_MODE_PLL_CONFIG = -1;
-static int ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL2 = -1;
+static int ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL = -1;
 static int * const ETT[] = {
     &ETT_T6,
     &ETT_T6_VIDEO_MODES,
     &ETT_T6_VIDEO_MODE,
     &ETT_T6_VIDEO_MODE_PLL_CONFIG,
-    &ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL2,
+    &ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL,
     &ETT_T6_BULK_FRAGMENT,
     &ETT_T6_BULK_FRAGMENTS,
 };
@@ -533,37 +533,39 @@ static double dissect_pll_config(proto_item *item, tvbuff_t *tvb) {
 
     proto_tree * item_tree = proto_item_add_subtree(item, ETT_T6_VIDEO_MODE_PLL_CONFIG);
 
-    uint32_t freq_offset = 0;
-    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_OFFSET, tvb, 0, 2, ENC_LITTLE_ENDIAN, &freq_offset);
+    uint32_t fnum = 0;
+    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_FNUM, tvb, 0, 2, ENC_LITTLE_ENDIAN, &fnum);
 
-    uint32_t mul0 = 0;
-    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL0, tvb, 2, 2, ENC_LITTLE_ENDIAN, &mul0);
+    uint32_t fden = 0;
+    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_FDEN, tvb, 2, 2, ENC_LITTLE_ENDIAN, &fden);
 
-    uint32_t mul1 = 0;
-    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL1, tvb, 4, 1, ENC_LITTLE_ENDIAN, &mul1);
+    uint32_t idiv = 0;
+    proto_tree_add_item_ret_uint(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_IDIV, tvb, 4, 1, ENC_LITTLE_ENDIAN, &idiv);
 
-    proto_item * mul2_item = proto_tree_add_item(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2, tvb, 5, 1, ENC_NA);
-    proto_tree * mul2_tree = proto_item_add_subtree(mul2_item, ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL2);
+    proto_item * mul2_item = proto_tree_add_item(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL, tvb, 5, 1, ENC_NA);
+    proto_tree * mul2_tree = proto_item_add_subtree(mul2_item, ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL);
 
     gboolean x2_en = false;
-    proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X2_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x2_en);
+    proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X2_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x2_en);
 
     gboolean x4_en = false;
-    proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL2_X4_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x4_en);
+    proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X4_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x4_en);
 
-    uint32_t mul2 = 1;
+    uint32_t mul = 1;
 
     if (x2_en) {
-        mul2 *= 2;
+        mul *= 2;
     }
 
     if (x4_en) {
-        mul2 *= 4;
+        mul *= 4;
     }
 
-    proto_item_append_text(mul2_item, ": %d", mul2);
+    proto_item_append_text(mul2_item, ": %d", mul);
 
-    pll_freq_khz = (freq_offset + mul0 * mul1) * mul2 * 1.25;
+    /* TODO: Replace "40" with base clock MHz value based on parsed hardware platform value (Lite: 48 MHz, Super Lite:
+     * 40 MHz). Pass through args from main dissector function? */
+    pll_freq_khz = ((fnum + fden * idiv) * mul * 40) / 32.0;
     proto_item_append_text(item, ": %.5g MHz", pll_freq_khz/1e3);
 
     return pll_freq_khz;
