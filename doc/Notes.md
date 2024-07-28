@@ -252,6 +252,9 @@ value, and "0xYY" is the bRequest value.
  * 0xc0, 0xb0: Get adapter info field.
    * wIndex: Field number.
      * 0: "Hardware Platform" (`<I`).
+       * Response values:
+         * 0: "Lite", 48 MHz base clock
+         * 1: "Super Lite", 40 MHz base clock
      * 1: "Boot Code Version" (`<I`).
      * 2: "Image Code Version" (`<I`).
      * 3: "Project Code" (16 byte null-terminated string).

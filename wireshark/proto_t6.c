@@ -2,7 +2,7 @@
 
 /*
  *  proto_t6.c - Wireshark dissector for MCT's Trigger 6 protocol.
- *  Copyright (C) 2023  Forest Crossman <cyrozap@gmail.com>
+ *  Copyright (C) 2023-2024  Forest Crossman <cyrozap@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -95,6 +95,12 @@ static const value_string INFO_FIELDS[] = {
     { 3, "Project Code" },
     { 4, "Vendor Command Version" },
     { 5, "Serial Number" },
+    { 0, NULL },
+};
+
+static const value_string HARDWARE_PLATFORMS[] = {
+    { 0, "Lite" },
+    { 1, "Super Lite" },
     { 0, NULL },
 };
 
@@ -312,7 +318,7 @@ static hf_register_info HF_T6_CONTROL[] = {
     },
     { &HF_T6_CONTROL_REQ_INFO_FIELD_HW_PLAT,
         { "Hardware Platform", "trigger6.control.info_field.hw_plat",
-        FT_UINT32, BASE_HEX, NULL, 0x0, NULL, HFILL }
+        FT_UINT32, BASE_HEX, VALS(HARDWARE_PLATFORMS), 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_INFO_FIELD_BOOT_CODE,
         { "Boot Code Version", "trigger6.control.info_field.boot_code",
