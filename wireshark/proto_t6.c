@@ -104,15 +104,23 @@ static const value_string HARDWARE_PLATFORMS[] = {
     { 0, NULL },
 };
 
+#define CONTROL_REQ_12 0x12
+#define CONTROL_REQ_80 0x80
+#define CONTROL_REQ_87 0x87
+#define CONTROL_REQ_89 0x89
+#define CONTROL_REQ_A5 0xA5
+#define CONTROL_REQ_B0 0xB0
+#define CONTROL_REQ_B1 0xB1
+#define CONTROL_REQ_B3 0xB3
 static const value_string CONTROL_REQS[] = {
-    { 0x12, "Set video mode?" },
-    { 0x80, "Get EDID block" },
-    { 0x87, "Get connector status?" },
-    { 0x89, "Get video modes" },
-    { 0xa5, "Get audio descriptor?" },
-    { 0xb0, "Get adapter info field" },
-    { 0xb1, "Get adapter session info?" },
-    { 0xb3, "Get adapter config blob?" },
+    { CONTROL_REQ_12, "Set video mode?" },
+    { CONTROL_REQ_80, "Get EDID block" },
+    { CONTROL_REQ_87, "Get connector status?" },
+    { CONTROL_REQ_89, "Get video modes" },
+    { CONTROL_REQ_A5, "Get audio descriptor?" },
+    { CONTROL_REQ_B0, "Get adapter info field" },
+    { CONTROL_REQ_B1, "Get adapter session info?" },
+    { CONTROL_REQ_B3, "Get adapter config blob?" },
     { 0, NULL },
 };
 
@@ -658,7 +666,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
     }
 
     switch (bRequest) {
-        case 0x80:
+        case CONTROL_REQ_80:
             if (setup_not_completion) {
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
@@ -667,7 +675,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                 proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, 0, 0, wIndex));
             }
             break;
-        case 0x89:
+        case CONTROL_REQ_89:
             if (setup_not_completion) {
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
@@ -676,14 +684,14 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                 proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET, tvb, 0, 0, wIndex));
             }
             break;
-        case 0xb0:
+        case CONTROL_REQ_B0:
             if (setup_not_completion) {
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_IDX, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
             } else {
                 proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_INFO_FIELD_IDX, tvb, 0, 0, wIndex));
             }
             break;
-        case 0xb1:
+        case CONTROL_REQ_B1:
             if (setup_not_completion) {
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_SESSION_INFO_NUM, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
             } else {
@@ -711,17 +719,17 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
         /* OUT Setup */
         // printf("CONTROL OUT: 0x%02x\n", bRequest);
         switch (bRequest) {
-            case 0x12:
+            case CONTROL_REQ_12:
                 dissect_video_mode(tree, tvb_new_subset_length(tvb, CTRL_SETUP_DATA_OFFSET, 32));
                 break;
         }
     } else if (in_not_out && !setup_not_completion) {
         /* IN Completion */
         switch (bRequest) {
-            case 0x80:
+            case CONTROL_REQ_80:
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_EDID_BLOCK_DATA, tvb, 0, 128, ENC_NA);
                 break;
-            case 0x89:
+            case CONTROL_REQ_89:
                 {
                     proto_item * video_modes_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_DATA, tvb, 0, -1, ENC_NA);
                     proto_tree * video_modes_tree = proto_item_add_subtree(video_modes_item, ETT_T6_VIDEO_MODES);
@@ -730,7 +738,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                     }
                 }
                 break;
-            case 0xb0:
+            case CONTROL_REQ_B0:
                 switch (wIndex) {
                     case 0:
                         proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_HW_PLAT, tvb, 0, 4, ENC_LITTLE_ENDIAN);
@@ -755,12 +763,12 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                         break;
                 }
                 break;
-            case 0xb1:
+            case CONTROL_REQ_B1:
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_SESSION_INFO_VDEV_VID, tvb, 0, 2, ENC_LITTLE_ENDIAN);
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_SESSION_INFO_VDEV_PID, tvb, 2, 2, ENC_LITTLE_ENDIAN);
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_SESSION_INFO_VDEV_NAME, tvb, 4, 64, ENC_UTF_16 | ENC_LITTLE_ENDIAN);
                 break;
-            case 0xb3:
+            case CONTROL_REQ_B3:
                 {
                     uint32_t conf_type = 0;
                     proto_tree_add_item_ret_uint(tree, HF_T6_CONTROL_REQ_CONF_INFO_TYPE, tvb, 0, 4, ENC_LITTLE_ENDIAN, &conf_type);
