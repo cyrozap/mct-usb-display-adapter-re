@@ -125,6 +125,7 @@ static const value_string CONF_TYPES[] = {
 };
 
 static const true_false_string tfs_sync_polarity = { "Positive", "Negative" };
+static const true_false_string tfs_timing = { "Customer", "Standard" };
 
 static dissector_handle_t T6_HANDLE = NULL;
 
@@ -166,7 +167,10 @@ static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X2_EN = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X4_EN = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11 = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_RESERVED = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_TIMING = -1;
 
 static int HF_T6_CONTROL_REQ_INFO_FIELD_IDX = -1;
 static int HF_T6_CONTROL_REQ_INFO_FIELD_HW_PLAT = -1;
@@ -308,9 +312,21 @@ static hf_register_info HF_T6_CONTROL[] = {
         { "Vertical sync polarity", "trigger6.control.video_mode.vertical_sync_polarity",
         FT_BOOLEAN, BASE_NONE, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11,
-        { "Unknown 11", "trigger6.control.video_mode.unk11",
-        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED,
+        { "Reduced", "trigger6.control.video_mode.reduced",
+        FT_BOOLEAN, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS,
+        { "Flags", "trigger6.control.video_mode.flags",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_RESERVED,
+        { "Reserved", "trigger6.control.video_mode.flags.reserved",
+        FT_UINT8, BASE_HEX, NULL, 0xFE, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_TIMING,
+        { "Timing", "trigger6.control.video_mode.flags.timing",
+        FT_BOOLEAN, 8, TFS(&tfs_timing), 0x01, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_INFO_FIELD_IDX,
         { "Info field", "trigger6.control.info_field.index",
@@ -510,7 +526,8 @@ static const field_sizes_t video_mode_fields[] = {
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG, 6 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY, 1 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY, 1 },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11, 2 },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED, 1 },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS, 1 },
 };
 
 static int ETT_T6 = -1;
@@ -518,12 +535,14 @@ static int ETT_T6_VIDEO_MODES = -1;
 static int ETT_T6_VIDEO_MODE = -1;
 static int ETT_T6_VIDEO_MODE_PLL_CONFIG = -1;
 static int ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL = -1;
+static int ETT_T6_VIDEO_MODE_FLAGS = -1;
 static int * const ETT[] = {
     &ETT_T6,
     &ETT_T6_VIDEO_MODES,
     &ETT_T6_VIDEO_MODE,
     &ETT_T6_VIDEO_MODE_PLL_CONFIG,
     &ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL,
+    &ETT_T6_VIDEO_MODE_FLAGS,
     &ETT_T6_BULK_FRAGMENT,
     &ETT_T6_BULK_FRAGMENTS,
 };
@@ -571,6 +590,12 @@ static double dissect_pll_config(proto_item *item, tvbuff_t *tvb) {
     return pll_freq_khz;
 }
 
+static void dissect_video_mode_flags(proto_item *item, tvbuff_t *tvb) {
+    proto_tree * item_tree = proto_item_add_subtree(item, ETT_T6_VIDEO_MODE_FLAGS);
+    proto_tree_add_item(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_RESERVED, tvb, 0, 1, ENC_LITTLE_ENDIAN);
+    proto_tree_add_item(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_TIMING, tvb, 0, 1, ENC_LITTLE_ENDIAN);
+}
+
 static void dissect_video_mode(proto_tree *tree, tvbuff_t *tvb) {
     proto_item * video_mode_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_MODE, tvb, 0, 32, ENC_NA);
     proto_tree * video_mode_tree = proto_item_add_subtree(video_mode_item, ETT_T6_VIDEO_MODE);
@@ -597,6 +622,8 @@ static void dissect_video_mode(proto_tree *tree, tvbuff_t *tvb) {
             v_res = tvb_get_letohs(tvb, field_offset);
         } else if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG) {
             pll_freq_khz = dissect_pll_config(item, tvb_new_subset_length(tvb, field_offset, 6));
+        } else if (video_mode_fields[i].hf == &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS) {
+            dissect_video_mode_flags(item, tvb_new_subset_length(tvb, field_offset, 1));
         }
 
         field_offset += video_mode_fields[i].size;
