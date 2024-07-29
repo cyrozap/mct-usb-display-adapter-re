@@ -302,11 +302,11 @@ static hf_register_info HF_T6_CONTROL[] = {
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY,
         { "Horizontal sync polarity", "trigger6.control.video_mode.horizontal_sync_polarity",
-        FT_BOOLEAN, BASE_DEC, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
+        FT_BOOLEAN, BASE_NONE, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY,
         { "Vertical sync polarity", "trigger6.control.video_mode.vertical_sync_polarity",
-        FT_BOOLEAN, BASE_DEC, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
+        FT_BOOLEAN, BASE_NONE, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_UNK_11,
         { "Unknown 11", "trigger6.control.video_mode.unk11",
