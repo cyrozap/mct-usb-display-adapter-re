@@ -116,11 +116,15 @@ static const value_string CONTROL_REQS[] = {
     { 0, NULL },
 };
 
+#define CONF_TYPE_UHAL 0x4C414855
+#define CONF_TYPE_DISP 0x50534944
+#define CONF_TYPE_AUD_ 0x5F445541
+#define CONF_TYPE_GPIO 0x4F495047
 static const value_string CONF_TYPES[] = {
-    { 0x4C414855, "UHAL" },
-    { 0x50534944, "DISP" },
-    { 0x5F445541, "AUD_" },
-    { 0x4F495047, "GPIO" },
+    { CONF_TYPE_UHAL, "UHAL" },
+    { CONF_TYPE_DISP, "DISP" },
+    { CONF_TYPE_AUD_, "AUD_" },
+    { CONF_TYPE_GPIO, "GPIO" },
     { 0, NULL },
 };
 
@@ -762,7 +766,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                     proto_tree_add_item_ret_uint(tree, HF_T6_CONTROL_REQ_CONF_INFO_TYPE, tvb, 0, 4, ENC_LITTLE_ENDIAN, &conf_type);
                     proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_SIZE, tvb, 4, 4, ENC_LITTLE_ENDIAN);
                     switch (conf_type) {
-                        case 0x50534944:
+                        case CONF_TYPE_DISP:
                             proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_VDEV_VID, tvb, 12, 2, ENC_LITTLE_ENDIAN);
                             proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_VDEV_PID, tvb, 14, 2, ENC_LITTLE_ENDIAN);
                             proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_VDEV_NAME, tvb, 16, 64, ENC_UTF_16 | ENC_LITTLE_ENDIAN);
