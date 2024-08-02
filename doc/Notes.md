@@ -206,10 +206,12 @@ value, and "0xYY" is the bRequest value.
    * wValue: Horizontal pixel position?
    * wIndex: Vertical pixel position?
  * 0x40, 0x05: Set cursor visibility?
+   * wValue: Cursor index, 0-9
    * wIndex:
      * 0x0000: Hidden?
      * 0x0001: Visible?
  * 0x40, 0x10: Upload cursor data?
+   * wValue: Cursor index, 0-9
    * wIndex: Byte offset into cursor data array.
    * wLength: N
    * Data: N bytes of 64x64-pixel cursor data in BGRA8888? or RGBA8888? format.
