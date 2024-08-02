@@ -722,6 +722,11 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
             case CONTROL_REQ_12:
                 dissect_video_mode(tree, tvb_new_subset_length(tvb, CTRL_SETUP_DATA_OFFSET, 32));
                 break;
+            default:
+                if (tvb_captured_length(tvb) > CTRL_SETUP_DATA_OFFSET) {
+                    proto_tree_add_item(tree, HF_T6_CONTROL_REQ_UNKNOWN_DATA, tvb, CTRL_SETUP_DATA_OFFSET, -1, ENC_NA);
+                }
+                break;
         }
     } else if (in_not_out && !setup_not_completion) {
         /* IN Completion */
