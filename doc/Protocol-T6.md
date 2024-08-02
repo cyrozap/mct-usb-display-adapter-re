@@ -25,6 +25,7 @@ value, and "0xYY" is the bRequest value.
    * wLength: N
    * Data: N bytes of 64x64-pixel cursor data in BGRA8888? or RGBA8888? format.
  * 0x40, 0x12: Set video mode
+   * wValue: Video output index (0 or 1).
    * wLength: 32
  * 0x40, 0x23: Unknown.
    * wLength: 40
