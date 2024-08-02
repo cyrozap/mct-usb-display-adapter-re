@@ -170,6 +170,7 @@ static int HF_T6_CONTROL_REQ_CURSOR_POS_X = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_POS_Y = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_IDX = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_ENABLE = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_DATA_BYTE_OFFSET = -1;
 
 static int HF_T6_CONTROL_REQ_VIDEO_CONN_IDX = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_OUTPUT_ENABLE = -1;
@@ -260,6 +261,10 @@ static hf_register_info HF_T6_CONTROL[] = {
     { &HF_T6_CONTROL_REQ_CURSOR_ENABLE,
         { "Cursor enable", "trigger6.control.cursor_enable",
         FT_BOOLEAN, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_DATA_BYTE_OFFSET,
+        { "Cursor data byte offset", "trigger6.control.cursor_data_byte_offset",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_CONN_IDX,
         { "Video connector index", "trigger6.control.video_connector",
@@ -728,6 +733,11 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
         case CONTROL_REQ_05:
             DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_CURSOR_IDX)
             DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_CURSOR_ENABLE)
+            break;
+        case CONTROL_REQ_10:
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_CURSOR_IDX)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_CURSOR_DATA_BYTE_OFFSET)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WLEN(HF_T6_CONTROL_REQ_WLEN)
             break;
         case CONTROL_REQ_12:
             DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_VIDEO_CONN_IDX)
