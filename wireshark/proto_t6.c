@@ -165,6 +165,12 @@ static int HF_T6_CONTROL_REQ_WVAL = -1;
 static int HF_T6_CONTROL_REQ_WIDX = -1;
 static int HF_T6_CONTROL_REQ_WLEN = -1;
 static int HF_T6_CONTROL_REQ_UNKNOWN_DATA = -1;
+
+static int HF_T6_CONTROL_REQ_CURSOR_POS_X = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_POS_Y = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_IDX = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_ENABLE = -1;
+
 static int HF_T6_CONTROL_REQ_VIDEO_CONN_IDX = -1;
 
 static int HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET = -1;
@@ -237,6 +243,22 @@ static hf_register_info HF_T6_CONTROL[] = {
     { &HF_T6_CONTROL_REQ_UNKNOWN_DATA,
         { "Unknown data", "trigger6.control.unknown_data",
         FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_POS_X,
+        { "Cursor X-position", "trigger6.control.cursor_pos.x",
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_POS_Y,
+        { "Cursor Y-position", "trigger6.control.cursor_pos.y",
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_IDX,
+        { "Cursor index", "trigger6.control.cursor_index",
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_ENABLE,
+        { "Cursor enable", "trigger6.control.cursor_enable",
+        FT_BOOLEAN, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_CONN_IDX,
         { "Video connector index", "trigger6.control.video_connector",
@@ -690,6 +712,14 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
     DISSECT_CONTROL_REQ_SETUP_FIELD_BREQ(HF_T6_CONTROL_REQ)
 
     switch (bRequest) {
+        case CONTROL_REQ_04:
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_CURSOR_POS_X)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_CURSOR_POS_Y)
+            break;
+        case CONTROL_REQ_05:
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_CURSOR_IDX)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_CURSOR_ENABLE)
+            break;
         case CONTROL_REQ_80:
             DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET)
             DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_VIDEO_CONN_IDX)
