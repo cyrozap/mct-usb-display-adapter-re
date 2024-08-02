@@ -672,62 +672,51 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
         return 0;
     }
 
-    if (setup_not_completion) {
-        proto_tree_add_item(tree, HF_T6_CONTROL_REQ, tvb, CTRL_BREQ_OFFSET, 1, ENC_LITTLE_ENDIAN);
-    } else {
-        proto_item * it = proto_tree_add_uint(tree, HF_T6_CONTROL_REQ, tvb, 0, 0, bRequest);
-        proto_item_set_generated(it);
+#define DISSECT_CONTROL_REQ_SETUP_FIELD(HFINDEX, OFFSET, LENGTH, FIELD)                 \
+    if (setup_not_completion) {                                                         \
+        proto_tree_add_item(tree, HFINDEX, tvb, OFFSET, LENGTH, ENC_LITTLE_ENDIAN);     \
+    } else {                                                                            \
+        proto_item_set_generated(proto_tree_add_uint(tree, HFINDEX, tvb, 0, 0, FIELD)); \
     }
+#define DISSECT_CONTROL_REQ_SETUP_FIELD_BREQ(HFINDEX) \
+    DISSECT_CONTROL_REQ_SETUP_FIELD(HFINDEX, CTRL_BREQ_OFFSET, 1, bRequest)
+#define DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HFINDEX) \
+    DISSECT_CONTROL_REQ_SETUP_FIELD(HFINDEX, CTRL_WVAL_OFFSET, 2, wValue)
+#define DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HFINDEX) \
+    DISSECT_CONTROL_REQ_SETUP_FIELD(HFINDEX, CTRL_WIDX_OFFSET, 2, wIndex)
+#define DISSECT_CONTROL_REQ_SETUP_FIELD_WLEN(HFINDEX) \
+    DISSECT_CONTROL_REQ_SETUP_FIELD(HFINDEX, CTRL_WLEN_OFFSET, 2, wLength)
+
+    DISSECT_CONTROL_REQ_SETUP_FIELD_BREQ(HF_T6_CONTROL_REQ)
 
     switch (bRequest) {
         case CONTROL_REQ_80:
-            if (setup_not_completion) {
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
-            } else {
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET, tvb, 0, 0, wValue));
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, 0, 0, wIndex));
-            }
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_VIDEO_CONN_IDX)
             break;
         case CONTROL_REQ_89:
-            if (setup_not_completion) {
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
-            } else {
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_CONN_IDX, tvb, 0, 0, wValue));
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET, tvb, 0, 0, wIndex));
-            }
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_VIDEO_CONN_IDX)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET)
             break;
         case CONTROL_REQ_B0:
-            if (setup_not_completion) {
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_IDX, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
-            } else {
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_INFO_FIELD_IDX, tvb, 0, 0, wIndex));
-            }
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_INFO_FIELD_IDX)
             break;
         case CONTROL_REQ_B1:
-            if (setup_not_completion) {
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_SESSION_INFO_NUM, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
-            } else {
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_SESSION_INFO_NUM, tvb, 0, 0, wIndex));
-            }
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_SESSION_INFO_NUM)
             break;
         default:
-            if (setup_not_completion) {
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_WVAL, tvb, CTRL_WVAL_OFFSET, 2, ENC_LITTLE_ENDIAN);
-                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_WIDX, tvb, CTRL_WIDX_OFFSET, 2, ENC_LITTLE_ENDIAN);
-            } else {
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_WVAL, tvb, 0, 0, wValue));
-                proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_WIDX, tvb, 0, 0, wIndex));
-            }
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_WVAL)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_WIDX)
             break;
     }
 
-    if (setup_not_completion) {
-        proto_tree_add_item(tree, HF_T6_CONTROL_REQ_WLEN, tvb, CTRL_WLEN_OFFSET, 2, ENC_LITTLE_ENDIAN);
-    } else {
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T6_CONTROL_REQ_WLEN, tvb, 0, 0, wLength));
-    }
+    DISSECT_CONTROL_REQ_SETUP_FIELD_WLEN(HF_T6_CONTROL_REQ_WLEN)
+
+#undef DISSECT_CONTROL_REQ_SETUP_FIELD
+#undef DISSECT_CONTROL_REQ_SETUP_FIELD_BREQ
+#undef DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL
+#undef DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX
+#undef DISSECT_CONTROL_REQ_SETUP_FIELD_WLEN
 
     if (!in_not_out && setup_not_completion) {
         /* OUT Setup */
