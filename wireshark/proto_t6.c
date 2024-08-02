@@ -113,9 +113,9 @@ static const value_string HARDWARE_PLATFORMS[] = {
 #define CONTROL_REQ_B1 0xB1
 #define CONTROL_REQ_B3 0xB3
 static const value_string CONTROL_REQS[] = {
-    { CONTROL_REQ_12, "Set video mode?" },
+    { CONTROL_REQ_12, "Set video mode" },
     { CONTROL_REQ_80, "Get EDID block" },
-    { CONTROL_REQ_87, "Get connector status?" },
+    { CONTROL_REQ_87, "Get connector status" },
     { CONTROL_REQ_89, "Get video modes" },
     { CONTROL_REQ_A5, "Get audio descriptor?" },
     { CONTROL_REQ_B0, "Get adapter info field" },

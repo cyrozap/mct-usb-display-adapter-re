@@ -198,25 +198,25 @@ value, and "0xYY" is the bRequest value.
 Commands are in the form of "0xXX, 0xYY", where "0xXX" is the bmRequestType
 value, and "0xYY" is the bRequest value.
 
- * 0x40, 0x03: Enable/disable video output?
+ * 0x40, 0x03: Enable/disable video output
    * wValue: Video output index (0 or 1).
    * wIndex:
-     * 0x0000: Disable video output?
-     * 0x0001: Enable video output?
- * 0x40, 0x04: Set cursor position?
-   * wValue: Horizontal pixel position?
-   * wIndex: Vertical pixel position?
- * 0x40, 0x05: Set cursor visibility?
+     * 0x0000: Disable video output
+     * 0x0001: Enable video output
+ * 0x40, 0x04: Set cursor position
+   * wValue: Horizontal pixel position
+   * wIndex: Vertical pixel position
+ * 0x40, 0x05: Set cursor visibility
    * wValue: Cursor index, 0-9
    * wIndex:
-     * 0x0000: Hidden?
-     * 0x0001: Visible?
- * 0x40, 0x10: Upload cursor data?
+     * 0x0000: Hidden
+     * 0x0001: Visible
+ * 0x40, 0x10: Upload cursor data
    * wValue: Cursor index, 0-9
    * wIndex: Byte offset into cursor data array.
    * wLength: N
    * Data: N bytes of 64x64-pixel cursor data in BGRA8888? or RGBA8888? format.
- * 0x40, 0x12: Set video mode?
+ * 0x40, 0x12: Set video mode
    * wLength: 32
  * 0x40, 0x23: Unknown.
    * wLength: 40
