@@ -172,6 +172,7 @@ static int HF_T6_CONTROL_REQ_CURSOR_IDX = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_ENABLE = -1;
 
 static int HF_T6_CONTROL_REQ_VIDEO_CONN_IDX = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_OUTPUT_ENABLE = -1;
 
 static int HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET = -1;
 static int HF_T6_CONTROL_REQ_EDID_BLOCK_DATA = -1;
@@ -263,6 +264,10 @@ static hf_register_info HF_T6_CONTROL[] = {
     { &HF_T6_CONTROL_REQ_VIDEO_CONN_IDX,
         { "Video connector index", "trigger6.control.video_connector",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_OUTPUT_ENABLE,
+        { "Video output enable", "trigger6.control.video_enable",
+        FT_BOOLEAN, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET,
         { "EDID byte offset", "trigger6.control.edid.byte_offset",
@@ -712,6 +717,10 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
     DISSECT_CONTROL_REQ_SETUP_FIELD_BREQ(HF_T6_CONTROL_REQ)
 
     switch (bRequest) {
+        case CONTROL_REQ_03:
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_VIDEO_CONN_IDX)
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_VIDEO_OUTPUT_ENABLE)
+            break;
         case CONTROL_REQ_04:
             DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_CURSOR_POS_X)
             DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_CURSOR_POS_Y)
