@@ -88,13 +88,19 @@ static const value_string SESSIONS[] = {
     { 0, NULL },
 };
 
+#define INFO_FIELD_HW_PLAT 0
+#define INFO_FIELD_BOOT_CODE 1
+#define INFO_FIELD_IMAGE_CODE 2
+#define INFO_FIELD_PROJECT_CODE 3
+#define INFO_FIELD_VENDOR_CMD_VER 4
+#define INFO_FIELD_SERIAL 5
 static const value_string INFO_FIELDS[] = {
-    { 0, "Hardware Platform" },
-    { 1, "Boot Code Version" },
-    { 2, "Image Code Version" },
-    { 3, "Project Code" },
-    { 4, "Vendor Command Version" },
-    { 5, "Serial Number" },
+    { INFO_FIELD_HW_PLAT, "Hardware Platform" },
+    { INFO_FIELD_BOOT_CODE, "Boot Code Version" },
+    { INFO_FIELD_IMAGE_CODE, "Image Code Version" },
+    { INFO_FIELD_PROJECT_CODE, "Project Code" },
+    { INFO_FIELD_VENDOR_CMD_VER, "Vendor Command Version" },
+    { INFO_FIELD_SERIAL, "Serial Number" },
     { 0, NULL },
 };
 
@@ -745,22 +751,22 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                 break;
             case CONTROL_REQ_B0:
                 switch (wIndex) {
-                    case 0:
+                    case INFO_FIELD_HW_PLAT:
                         proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_HW_PLAT, tvb, 0, 4, ENC_LITTLE_ENDIAN);
                         break;
-                    case 1:
+                    case INFO_FIELD_BOOT_CODE:
                         proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_BOOT_CODE, tvb, 0, 4, ENC_LITTLE_ENDIAN);
                         break;
-                    case 2:
+                    case INFO_FIELD_IMAGE_CODE:
                         proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_IMAGE_CODE, tvb, 0, 4, ENC_LITTLE_ENDIAN);
                         break;
-                    case 3:
+                    case INFO_FIELD_PROJECT_CODE:
                         proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_PROJECT_CODE, tvb, 0, -1, ENC_ASCII);
                         break;
-                    case 4:
+                    case INFO_FIELD_VENDOR_CMD_VER:
                         proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_VENDOR_CMD_VER, tvb, 0, 4, ENC_LITTLE_ENDIAN);
                         break;
-                    case 5:
+                    case INFO_FIELD_SERIAL:
                         proto_tree_add_item(tree, HF_T6_CONTROL_REQ_INFO_FIELD_SERIAL, tvb, 0, -1, ENC_NA);
                         break;
                     default:
