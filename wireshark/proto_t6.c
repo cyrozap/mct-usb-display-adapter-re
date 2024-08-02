@@ -110,6 +110,10 @@ static const value_string HARDWARE_PLATFORMS[] = {
     { 0, NULL },
 };
 
+#define CONTROL_REQ_03 0x03
+#define CONTROL_REQ_04 0x04
+#define CONTROL_REQ_05 0x05
+#define CONTROL_REQ_10 0x10
 #define CONTROL_REQ_12 0x12
 #define CONTROL_REQ_80 0x80
 #define CONTROL_REQ_87 0x87
@@ -119,6 +123,10 @@ static const value_string HARDWARE_PLATFORMS[] = {
 #define CONTROL_REQ_B1 0xB1
 #define CONTROL_REQ_B3 0xB3
 static const value_string CONTROL_REQS[] = {
+    { CONTROL_REQ_03, "Set video output state" },
+    { CONTROL_REQ_04, "Set cursor position" },
+    { CONTROL_REQ_05, "Set cursor state" },
+    { CONTROL_REQ_10, "Upload cursor data" },
     { CONTROL_REQ_12, "Set video mode" },
     { CONTROL_REQ_80, "Get EDID block" },
     { CONTROL_REQ_87, "Get connector status" },
