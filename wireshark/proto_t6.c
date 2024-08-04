@@ -150,6 +150,11 @@ static const value_string CONF_TYPES[] = {
     { 0, NULL },
 };
 
+static const value_string CURSOR_PIXEL_FORMATS[] = {
+    { 1, "RGBA?" },
+    { 0, NULL },
+};
+
 static const true_false_string tfs_sync_polarity = { "Positive", "Negative" };
 static const true_false_string tfs_timing = { "Customer", "Standard" };
 
@@ -173,6 +178,11 @@ static int HF_T6_CONTROL_REQ_CURSOR_IDX = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_ENABLE = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_DATA_BYTE_OFFSET = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_DATA = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_DATA_PIXEL_FORMAT = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_DATA_WIDTH = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_DATA_HEIGHT = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_DATA_STRIDE = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_DATA_PIXEL_DATA = -1;
 
 static int HF_T6_CONTROL_REQ_VIDEO_CONN_IDX = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_OUTPUT_ENABLE = -1;
@@ -270,6 +280,26 @@ static hf_register_info HF_T6_CONTROL[] = {
     },
     { &HF_T6_CONTROL_REQ_CURSOR_DATA,
         { "Cursor data", "trigger6.control.cursor_data",
+        FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_DATA_PIXEL_FORMAT,
+        { "Pixel format", "trigger6.control.cursor_data.pixel_format",
+        FT_UINT16, BASE_DEC, VALS(CURSOR_PIXEL_FORMATS), 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_DATA_WIDTH,
+        { "Width (pixels)", "trigger6.control.cursor_data.width",
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_DATA_HEIGHT,
+        { "Height (pixels)", "trigger6.control.cursor_data.height",
+        FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_DATA_STRIDE,
+        { "Stride (bytes)", "trigger6.control.cursor_data.stride",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_DATA_PIXEL_DATA,
+        { "Pixel data", "trigger6.control.cursor_data.pixel_data",
         FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_CONN_IDX,
@@ -674,6 +704,7 @@ static int ETT_T6_VIDEO_MODE = -1;
 static int ETT_T6_VIDEO_MODE_PLL_CONFIG = -1;
 static int ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL = -1;
 static int ETT_T6_VIDEO_MODE_FLAGS = -1;
+static int ETT_T6_CURSOR_DATA = -1;
 static int * const ETT[] = {
     &ETT_T6,
     &ETT_T6_VIDEO_MODES,
@@ -681,6 +712,7 @@ static int * const ETT[] = {
     &ETT_T6_VIDEO_MODE_PLL_CONFIG,
     &ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL,
     &ETT_T6_VIDEO_MODE_FLAGS,
+    &ETT_T6_CURSOR_DATA,
     &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT,
     &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS,
     &ETT_T6_BULK_FRAGMENT,
@@ -730,7 +762,13 @@ static void dissect_cursor_upload(proto_tree *tree, tvbuff_t *tvb, packet_info *
     }
 
     if (next_tvb) {
-        proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CURSOR_DATA, next_tvb, 0, -1, ENC_NA);
+        proto_item * cursor_data_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CURSOR_DATA, next_tvb, 0, -1, ENC_NA);
+        proto_tree * cursor_data_tree = proto_item_add_subtree(cursor_data_item, ETT_T6_CURSOR_DATA);
+        proto_tree_add_item(cursor_data_tree, HF_T6_CONTROL_REQ_CURSOR_DATA_PIXEL_FORMAT, next_tvb, 0, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(cursor_data_tree, HF_T6_CONTROL_REQ_CURSOR_DATA_WIDTH, next_tvb, 2, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(cursor_data_tree, HF_T6_CONTROL_REQ_CURSOR_DATA_HEIGHT, next_tvb, 4, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(cursor_data_tree, HF_T6_CONTROL_REQ_CURSOR_DATA_STRIDE, next_tvb, 6, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(cursor_data_tree, HF_T6_CONTROL_REQ_CURSOR_DATA_PIXEL_DATA, next_tvb, 8, -1, ENC_LITTLE_ENDIAN);
     }
 }
 
