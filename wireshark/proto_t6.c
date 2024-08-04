@@ -117,6 +117,7 @@ static const value_string HARDWARE_PLATFORMS[] = {
 #define CONTROL_REQ_12 0x12
 #define CONTROL_REQ_80 0x80
 #define CONTROL_REQ_87 0x87
+#define CONTROL_REQ_88 0x88
 #define CONTROL_REQ_89 0x89
 #define CONTROL_REQ_A5 0xA5
 #define CONTROL_REQ_B0 0xB0
@@ -130,6 +131,7 @@ static const value_string CONTROL_REQS[] = {
     { CONTROL_REQ_12, "Set video mode" },
     { CONTROL_REQ_80, "Get EDID block" },
     { CONTROL_REQ_87, "Get connector status" },
+    { CONTROL_REQ_88, "Get video RAM size" },
     { CONTROL_REQ_89, "Get video modes" },
     { CONTROL_REQ_A5, "Get audio descriptor?" },
     { CONTROL_REQ_B0, "Get adapter info field" },
@@ -189,6 +191,8 @@ static int HF_T6_CONTROL_REQ_VIDEO_OUTPUT_ENABLE = -1;
 
 static int HF_T6_CONTROL_REQ_EDID_BYTE_OFFSET = -1;
 static int HF_T6_CONTROL_REQ_EDID_BLOCK_DATA = -1;
+
+static int HF_T6_CONTROL_REQ_VIDEO_RAM_SIZE_MB = -1;
 
 static int HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODES_DATA = -1;
@@ -317,6 +321,10 @@ static hf_register_info HF_T6_CONTROL[] = {
     { &HF_T6_CONTROL_REQ_EDID_BLOCK_DATA,
         { "EDID block data", "trigger6.control.edid.block_data",
         FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_VIDEO_RAM_SIZE_MB,
+        { "Video RAM size (MB)", "trigger6.control.video_ram_size_mb",
+        FT_UINT8, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET,
         { "Video modes byte offset", "trigger6.control.video_modes.byte_offset",
@@ -915,6 +923,9 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
             DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_VIDEO_CONN_IDX)
             DISSECT_CONTROL_REQ_SETUP_FIELD_WLEN(HF_T6_CONTROL_REQ_WLEN)
             break;
+        case CONTROL_REQ_88:
+            DISSECT_CONTROL_REQ_SETUP_FIELD_WLEN(HF_T6_CONTROL_REQ_WLEN)
+            break;
         case CONTROL_REQ_89:
             DISSECT_CONTROL_REQ_SETUP_FIELD_WVAL(HF_T6_CONTROL_REQ_VIDEO_CONN_IDX)
             DISSECT_CONTROL_REQ_SETUP_FIELD_WIDX(HF_T6_CONTROL_REQ_VIDEO_MODES_BYTE_OFFSET)
@@ -962,6 +973,9 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
         switch (bRequest) {
             case CONTROL_REQ_80:
                 proto_tree_add_item(tree, HF_T6_CONTROL_REQ_EDID_BLOCK_DATA, tvb, 0, 128, ENC_NA);
+                break;
+            case CONTROL_REQ_88:
+                proto_tree_add_item(tree, HF_T6_CONTROL_REQ_VIDEO_RAM_SIZE_MB, tvb, 0, 1, ENC_LITTLE_ENDIAN);
                 break;
             case CONTROL_REQ_89:
                 {

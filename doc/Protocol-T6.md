@@ -43,7 +43,7 @@ value, and "0xYY" is the bRequest value.
    * Return value:
      * 0x00: Disconnected.
      * 0x01: Connected.
- * 0xc0, 0x88: Unknown.
+ * 0xc0, 0x88: Get video RAM size in MB
    * wLength: 1
  * 0xc0, 0x89: Get array of video modes supported by the chip.
    * wValue: Video output index (0 or 1).
