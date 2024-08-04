@@ -156,6 +156,7 @@ static const true_false_string tfs_timing = { "Customer", "Standard" };
 static dissector_handle_t T6_HANDLE = NULL;
 
 static reassembly_table T6_REASSEMBLY_TABLE = { 0 };
+static reassembly_table T6_CONTROL_CURSOR_UPLOAD_REASSEMBLY_TABLE = { 0 };
 
 static int PROTO_T6 = -1;
 
@@ -171,6 +172,7 @@ static int HF_T6_CONTROL_REQ_CURSOR_POS_Y = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_IDX = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_ENABLE = -1;
 static int HF_T6_CONTROL_REQ_CURSOR_DATA_BYTE_OFFSET = -1;
+static int HF_T6_CONTROL_REQ_CURSOR_DATA = -1;
 
 static int HF_T6_CONTROL_REQ_VIDEO_CONN_IDX = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_OUTPUT_ENABLE = -1;
@@ -265,6 +267,10 @@ static hf_register_info HF_T6_CONTROL[] = {
     { &HF_T6_CONTROL_REQ_CURSOR_DATA_BYTE_OFFSET,
         { "Cursor data byte offset", "trigger6.control.cursor_data_byte_offset",
         FT_UINT16, BASE_DEC_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CURSOR_DATA,
+        { "Cursor data", "trigger6.control.cursor_data",
+        FT_BYTES, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_CONN_IDX,
         { "Video connector index", "trigger6.control.video_connector",
@@ -491,6 +497,80 @@ static hf_register_info HF_T6_BULK[] = {
     },
 };
 
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_OVERLAP = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_OVERLAP_CONFLICTS = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_MULTIPLE_TAILS = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_TOO_LONG_FRAGMENT = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_ERROR = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_COUNT = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_REASSEMBLED_IN = -1;
+static int HF_T6_CONTROL_CURSOR_UPLOAD_REASSEMBLED_LENGTH = -1;
+
+static int ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT = -1;
+static int ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS = -1;
+
+static const fragment_items T6_CONTROL_CURSOR_UPLOAD_FRAG_ITEMS = {
+    &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT,
+    &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_OVERLAP,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_OVERLAP_CONFLICTS,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_MULTIPLE_TAILS,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_TOO_LONG_FRAGMENT,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_ERROR,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_COUNT,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_REASSEMBLED_IN,
+    &HF_T6_CONTROL_CURSOR_UPLOAD_REASSEMBLED_LENGTH,
+    NULL,
+    "Payload fragments",
+};
+
+static hf_register_info HF_T6_CONTROL_CURSOR_UPLOAD_FRAG[] = {
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS,
+        { "Payload fragments", "trigger6.control.cursor_data.fragments",
+        FT_NONE, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT,
+        { "Payload fragment", "trigger6.control.cursor_data.fragment",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_OVERLAP,
+        { "Payload fragment overlap", "trigger6.control.cursor_data.fragment.overlap",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_OVERLAP_CONFLICTS,
+        { "Payload fragment overlapping with conflicting data", "trigger6.control.cursor_data.fragment.overlap.conflicts",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_MULTIPLE_TAILS,
+        { "Payload has multiple tail fragments", "trigger6.control.cursor_data.fragment.multiple_tails",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_TOO_LONG_FRAGMENT,
+        { "Payload fragment too long", "trigger6.control.cursor_data.fragment.too_long_fragment",
+        FT_BOOLEAN, 0, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_ERROR,
+        { "Payload defragmentation error", "trigger6.control.cursor_data.fragment.error",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT_COUNT,
+        { "Payload fragment count", "trigger6.control.cursor_data.fragment.count",
+        FT_UINT32, BASE_DEC, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_REASSEMBLED_IN,
+        { "Reassembled in", "trigger6.control.cursor_data.reassembled.in",
+        FT_FRAMENUM, BASE_NONE, NULL, 0x00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_CURSOR_UPLOAD_REASSEMBLED_LENGTH,
+        { "Reassembled length", "trigger6.control.cursor_data.reassembled.length",
+        FT_UINT32, BASE_DEC, NULL, 0x00, NULL, HFILL }
+    },
+};
+
 static int HF_T6_BULK_FRAGMENTS = -1;
 static int HF_T6_BULK_FRAGMENT = -1;
 static int HF_T6_BULK_FRAGMENT_OVERLAP = -1;
@@ -601,9 +681,58 @@ static int * const ETT[] = {
     &ETT_T6_VIDEO_MODE_PLL_CONFIG,
     &ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL,
     &ETT_T6_VIDEO_MODE_FLAGS,
+    &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT,
+    &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS,
     &ETT_T6_BULK_FRAGMENT,
     &ETT_T6_BULK_FRAGMENTS,
 };
+
+static void dissect_cursor_upload(proto_tree *tree, tvbuff_t *tvb, packet_info *pinfo, uint16_t cursor_index, uint16_t cursor_data_byte_offset) {
+    tvbuff_t * next_tvb = NULL;
+
+    gboolean initial_and_fragmented = false;
+    if (cursor_data_byte_offset == 0) {
+        uint16_t height = tvb_get_letohs(tvb, 4);
+        uint16_t pitch = tvb_get_letohs(tvb, 6);
+        uint32_t total_cursor_bytes = height * pitch;
+        if (total_cursor_bytes > tvb_captured_length(tvb)) {
+            initial_and_fragmented = true;
+        }
+    }
+
+    if (initial_and_fragmented || (cursor_data_byte_offset > 0)) {
+        /* Fragmented */
+        pinfo->fragmented = true;
+
+        /* TODO: Keep track of the initial cursor upload requests and the number of bytes remaining to upload, then use
+         * that value to determine if more fragments are needed.
+         *
+         * For now, just assume that if the payload size is not exactly 512 bytes (a full packet) the cursor data is
+         * fragmented. */
+        gboolean more_frags = tvb_captured_length(tvb) == 512;
+
+        fragment_head * frag_head = fragment_add_check(&T6_CONTROL_CURSOR_UPLOAD_REASSEMBLY_TABLE,
+            tvb, 0, pinfo, cursor_index, NULL,
+            cursor_data_byte_offset, tvb_captured_length(tvb), more_frags);
+
+        next_tvb = process_reassembled_data(tvb, 0, pinfo, "Reassembled Cursor Data", frag_head, &T6_CONTROL_CURSOR_UPLOAD_FRAG_ITEMS, NULL, tree);
+
+        if (frag_head) {
+            /* Reassembled */
+            col_append_str(pinfo->cinfo, COL_INFO, " (Cursor Data Reassembled)");
+        } else {
+            /* Failed to reassemble. This can happen when a packet captures less data than was reported. */
+            col_append_fstr(pinfo->cinfo, COL_INFO, " (Fragment offset %u)", cursor_data_byte_offset);
+        }
+    } else {
+        /* Not fragmented */
+        next_tvb = tvb;
+    }
+
+    if (next_tvb) {
+        proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CURSOR_DATA, next_tvb, 0, -1, ENC_NA);
+    }
+}
 
 static double dissect_pll_config(proto_item *item, tvbuff_t *tvb) {
     double pll_freq_khz = 0;
@@ -778,6 +907,9 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
         /* OUT Setup */
         // printf("CONTROL OUT: 0x%02x\n", bRequest);
         switch (bRequest) {
+            case CONTROL_REQ_10:
+                dissect_cursor_upload(tree, tvb_new_subset_remaining(tvb, CTRL_SETUP_DATA_OFFSET), pinfo, wValue, wIndex);
+                break;
             case CONTROL_REQ_12:
                 dissect_video_mode(tree, tvb_new_subset_length(tvb, CTRL_SETUP_DATA_OFFSET, 32));
                 break;
@@ -1027,8 +1159,10 @@ void proto_register_trigger6(void) {
     );
 
     reassembly_table_register(&T6_REASSEMBLY_TABLE, &addresses_reassembly_table_functions);
+    reassembly_table_register(&T6_CONTROL_CURSOR_UPLOAD_REASSEMBLY_TABLE, &addresses_reassembly_table_functions);
 
     proto_register_field_array(PROTO_T6, HF_T6_CONTROL, array_length(HF_T6_CONTROL));
+    proto_register_field_array(PROTO_T6, HF_T6_CONTROL_CURSOR_UPLOAD_FRAG, array_length(HF_T6_CONTROL_CURSOR_UPLOAD_FRAG));
     proto_register_field_array(PROTO_T6, HF_T6_BULK, array_length(HF_T6_BULK));
     proto_register_field_array(PROTO_T6, HF_T6_BULK_FRAG, array_length(HF_T6_BULK_FRAG));
 
