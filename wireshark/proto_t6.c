@@ -73,7 +73,7 @@ typedef struct bigger_range_s {
 static const uint32_t MCT_USB_VID = 0x0711;
 static const uint32_t INSIGNIA_USB_VID = 0x19FF;
 
-static bigger_range_t MCT_USB_PID_RANGE = {
+static const bigger_range_t MCT_USB_PID_RANGE = {
     .nranges = 2,
     .ranges = {
         { .low = (MCT_USB_VID << 16) | 0x5600, .high = (MCT_USB_VID << 16) | 0x561F },
