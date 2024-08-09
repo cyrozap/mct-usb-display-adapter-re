@@ -94,6 +94,10 @@ See [doc/Notes.md](doc/Notes.md).
      * ITE IT66121
    * Quad HDMI outputs
      * 4x 1080p60
+ * [HP Engage 6.6 inch Display][hp-engage]
+   * Internal LCD output
+     * 6.6 inches diagonal
+     * 1400 x 720 pixels
 
 
 ## License
@@ -126,5 +130,6 @@ Except where stated otherwise:
 [jca365]: https://en.j5create.com/products/jca365
 [jca366]: https://en.j5create.com/products/jca366
 [jcd543]: https://en.j5create.com/products/jcd543
+[hp-engage]: https://h20195.www2.hp.com/v2/GetDocument.aspx?docname=c07072047
 [license]: LICENSE.txt
 [cc-by-sa]: https://creativecommons.org/licenses/by-sa/4.0/
