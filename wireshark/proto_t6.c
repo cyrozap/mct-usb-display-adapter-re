@@ -248,6 +248,30 @@ static int HF_T6_CONTROL_REQ_CONF_INFO_SIZE = -1;
 static int HF_T6_CONTROL_REQ_CONF_INFO_VDEV_VID = -1;
 static int HF_T6_CONTROL_REQ_CONF_INFO_VDEV_PID = -1;
 static int HF_T6_CONTROL_REQ_CONF_INFO_VDEV_NAME = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_VERSION = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION_ROTATE = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION_RESET = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_VIDEO_MODES_OFFSET = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_VIDEO_MODES_COUNT = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_RESERVED = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_LINK_INTERFACES = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_VIDEO_MODES_OFFSET = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_VIDEO_MODES_COUNT = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_RESERVED = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_LINK_INTERFACES = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_LVDS_RESERVED = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_LVDS_I2C = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVI_RESERVED = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVI_I2C = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_TRANSMITTER = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_RESERVED = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_I2C = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DAC_RESERVED = -1;
+static int HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DAC_I2C = -1;
 
 static hf_register_info HF_T6_CONTROL[] = {
     { &HF_T6_CONTROL_REQ,
@@ -506,6 +530,102 @@ static hf_register_info HF_T6_CONTROL[] = {
         { "Virtual device name", "trigger6.control.conf_info.disp.name",
         FT_STRINGZ, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_VERSION,
+        { "Configuration version", "trigger6.control.conf_info.version",
+        FT_UINT32, BASE_DEC, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION,
+        { "Display function", "trigger6.control.conf_info.disp_func",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION_ROTATE,
+        { "Rotate", "trigger6.control.conf_info.disp_func.rotate",
+        FT_UINT32, BASE_HEX, NULL, 0x000000F0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION_RESET,
+        { "Reset", "trigger6.control.conf_info.disp_func.reset",
+        FT_BOOLEAN, 32, NULL, 0x00000008, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS,
+        { "Display 0 capabilities", "trigger6.control.conf_info.disp0_caps",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_VIDEO_MODES_OFFSET,
+        { "Video modes offset", "trigger6.control.conf_info.disp0_caps.video_modes_offset",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0xFFFF0000, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_VIDEO_MODES_COUNT,
+        { "Video modes count", "trigger6.control.conf_info.disp0_caps.video_modes_count",
+        FT_UINT32, BASE_DEC, NULL, 0x0000FF00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_RESERVED,
+        { "Reserved", "trigger6.control.conf_info.disp0_caps.resered",
+        FT_UINT32, BASE_HEX, NULL, 0x000000F0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_LINK_INTERFACES,
+        { "Link interfaces", "trigger6.control.conf_info.disp0_caps.link_interfaces",
+        FT_UINT32, BASE_DEC, NULL, 0x0000000F, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS,
+        { "Display 1 capabilities", "trigger6.control.conf_info.disp1_caps",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_VIDEO_MODES_OFFSET,
+        { "Video modes offset", "trigger6.control.conf_info.disp1_caps.video_modes_offset",
+        FT_UINT32, BASE_HEX_DEC, NULL, 0xFFFF0000, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_VIDEO_MODES_COUNT,
+        { "Video modes count", "trigger6.control.conf_info.disp1_caps.video_modes_count",
+        FT_UINT32, BASE_DEC, NULL, 0x0000FF00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_RESERVED,
+        { "Reserved", "trigger6.control.conf_info.disp1_caps.resered",
+        FT_UINT32, BASE_HEX, NULL, 0x000000F0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_LINK_INTERFACES,
+        { "Link interfaces", "trigger6.control.conf_info.disp1_caps.link_interfaces",
+        FT_UINT32, BASE_DEC, NULL, 0x0000000F, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE,
+        { "Display interface", "trigger6.control.conf_info.disp_intf",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_LVDS_RESERVED,
+        { "LVDS reserved", "trigger6.control.conf_info.disp_intf.lvds_reserved",
+        FT_UINT32, BASE_HEX, NULL, 0xFC000000, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_LVDS_I2C,
+        { "LVDS I2C", "trigger6.control.conf_info.disp_intf.lvds_i2c",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x03000000, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVI_RESERVED,
+        { "DVI reserved", "trigger6.control.conf_info.disp_intf.dvi_reserved",
+        FT_UINT32, BASE_HEX, NULL, 0x00FC0000, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVI_I2C,
+        { "DVI I2C", "trigger6.control.conf_info.disp_intf.dvi_i2c",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x00030000, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_TRANSMITTER,
+        { "DVO transmitter", "trigger6.control.conf_info.disp_intf.dvo_transmitter",
+        FT_UINT32, BASE_DEC, NULL, 0x0000F000, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_RESERVED,
+        { "DVO reserved", "trigger6.control.conf_info.disp_intf.dvo_reserved",
+        FT_UINT32, BASE_HEX, NULL, 0x00000C00, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_I2C,
+        { "DVO I2C", "trigger6.control.conf_info.disp_intf.dvo_i2c",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x00000300, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DAC_RESERVED,
+        { "DAC reserved", "trigger6.control.conf_info.disp_intf.dac_reserved",
+        FT_UINT32, BASE_HEX, NULL, 0x000000FC, NULL, HFILL }
+    },
+    { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DAC_I2C,
+        { "DAC I2C", "trigger6.control.conf_info.disp_intf.dac_i2c",
+        FT_UINT32, BASE_DEC_HEX, NULL, 0x00000003, NULL, HFILL }
+    },
 };
 
 static int HF_T6_BULK_SESSION_SELECTOR = -1;
@@ -725,6 +845,10 @@ static int ETT_T6_VIDEO_MODE_PLL_CONFIG = -1;
 static int ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL = -1;
 static int ETT_T6_VIDEO_MODE_FLAGS = -1;
 static int ETT_T6_CURSOR_DATA = -1;
+static int ETT_T6_CONF_INFO_DISPLAY_FUNCTION = -1;
+static int ETT_T6_CONF_INFO_DISP0_CAPS = -1;
+static int ETT_T6_CONF_INFO_DISP1_CAPS = -1;
+static int ETT_T6_CONF_INFO_DISPLAY_INTERFACE = -1;
 static int * const ETT[] = {
     &ETT_T6,
     &ETT_T6_VIDEO_MODES,
@@ -733,6 +857,10 @@ static int * const ETT[] = {
     &ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL,
     &ETT_T6_VIDEO_MODE_FLAGS,
     &ETT_T6_CURSOR_DATA,
+    &ETT_T6_CONF_INFO_DISPLAY_FUNCTION,
+    &ETT_T6_CONF_INFO_DISP0_CAPS,
+    &ETT_T6_CONF_INFO_DISP1_CAPS,
+    &ETT_T6_CONF_INFO_DISPLAY_INTERFACE,
     &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENT,
     &ETT_T6_CONTROL_CURSOR_UPLOAD_FRAGMENTS,
     &ETT_T6_BULK_FRAGMENT,
@@ -1045,6 +1173,38 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
                             proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_VDEV_VID, tvb, 12, 2, ENC_LITTLE_ENDIAN);
                             proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_VDEV_PID, tvb, 14, 2, ENC_LITTLE_ENDIAN);
                             proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_VDEV_NAME, tvb, 16, 64, ENC_UTF_16 | ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_VERSION, tvb, 80, 4, ENC_LITTLE_ENDIAN);
+
+                            proto_item * disp_func_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION, tvb, 84, 4, ENC_NA);
+                            proto_tree * disp_func_tree = proto_item_add_subtree(disp_func_item, ETT_T6_CONF_INFO_DISPLAY_FUNCTION);
+                            proto_tree_add_item(disp_func_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION_ROTATE, tvb, 84, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_func_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_FUNCTION_RESET, tvb, 84, 4, ENC_LITTLE_ENDIAN);
+
+                            proto_item * disp0_caps_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS, tvb, 88, 4, ENC_NA);
+                            proto_tree * disp0_caps_tree = proto_item_add_subtree(disp0_caps_item, ETT_T6_CONF_INFO_DISP0_CAPS);
+                            proto_tree_add_item(disp0_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_VIDEO_MODES_OFFSET, tvb, 88, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp0_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_VIDEO_MODES_COUNT, tvb, 88, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp0_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_RESERVED, tvb, 88, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp0_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP0_CAPS_LINK_INTERFACES, tvb, 88, 4, ENC_LITTLE_ENDIAN);
+
+                            proto_item * disp1_caps_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS, tvb, 92, 4, ENC_NA);
+                            proto_tree * disp1_caps_tree = proto_item_add_subtree(disp1_caps_item, ETT_T6_CONF_INFO_DISP1_CAPS);
+                            proto_tree_add_item(disp1_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_VIDEO_MODES_OFFSET, tvb, 92, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp1_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_VIDEO_MODES_COUNT, tvb, 92, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp1_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_RESERVED, tvb, 92, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp1_caps_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISP1_CAPS_LINK_INTERFACES, tvb, 92, 4, ENC_LITTLE_ENDIAN);
+
+                            proto_item * disp_intf_item = proto_tree_add_item(tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE, tvb, 96, 4, ENC_NA);
+                            proto_tree * disp_intf_tree = proto_item_add_subtree(disp_intf_item, ETT_T6_CONF_INFO_DISPLAY_INTERFACE);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_LVDS_RESERVED, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_LVDS_I2C, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVI_RESERVED, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVI_I2C, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_TRANSMITTER, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_RESERVED, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_I2C, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DAC_RESERVED, tvb, 96, 4, ENC_LITTLE_ENDIAN);
+                            proto_tree_add_item(disp_intf_tree, HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DAC_I2C, tvb, 96, 4, ENC_LITTLE_ENDIAN);
                             break;
                     }
                 }
