@@ -158,6 +158,13 @@ static const value_string CONF_TYPES[] = {
     { 0, NULL },
 };
 
+static const value_string DVO_TRANSMITTER_TYPES[] = {
+    { 0, "None?" },
+    { 3, "HDMI?" },
+    { 7, "DP?" },
+    { 0, NULL },
+};
+
 static const value_string CURSOR_PIXEL_FORMATS[] = {
     { 1, "RGBA?" },
     { 0, NULL },
@@ -608,7 +615,7 @@ static hf_register_info HF_T6_CONTROL[] = {
     },
     { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_TRANSMITTER,
         { "DVO transmitter", "trigger6.control.conf_info.disp_intf.dvo_transmitter",
-        FT_UINT32, BASE_DEC, NULL, 0x0000F000, NULL, HFILL }
+        FT_UINT32, BASE_DEC, VALS(DVO_TRANSMITTER_TYPES), 0x0000F000, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_CONF_INFO_DISPLAY_INTERFACE_DVO_RESERVED,
         { "DVO reserved", "trigger6.control.conf_info.disp_intf.dvo_reserved",
