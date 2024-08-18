@@ -232,7 +232,7 @@ static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X2_EN = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X4_EN = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY = -1;
-static int HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED = -1;
+static int HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED_BLANKING = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_RESERVED = -1;
 static int HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS_TIMING = -1;
@@ -457,8 +457,8 @@ static hf_register_info HF_T6_CONTROL[] = {
         { "Vertical sync polarity", "trigger6.control.video_mode.vertical_sync_polarity",
         FT_BOOLEAN, BASE_NONE, TFS(&tfs_sync_polarity), 0x0, NULL, HFILL }
     },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED,
-        { "Reduced", "trigger6.control.video_mode.reduced",
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED_BLANKING,
+        { "Reduced blanking", "trigger6.control.video_mode.reduced_blanking",
         FT_BOOLEAN, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS,
@@ -841,7 +841,7 @@ static const field_sizes_t video_mode_fields[] = {
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG, 6 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_HORIZONTAL_SYNC_POLARITY, 1 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_VERTICAL_SYNC_POLARITY, 1 },
-    { &HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED, 1 },
+    { &HF_T6_CONTROL_REQ_VIDEO_MODE_REDUCED_BLANKING, 1 },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_FLAGS, 1 },
 };
 
