@@ -965,7 +965,11 @@ static double dissect_pll_config(proto_item *item, tvbuff_t *tvb) {
     /* TODO: Replace "40" with base clock MHz value based on parsed hardware platform value (Lite: 48 MHz, Super Lite:
      * 40 MHz). Pass through args from main dissector function? */
     pll_freq_khz = ((fnum + fden * idiv) * mul * 40) / 32.0;
-    proto_item_append_text(item, ": %.5g MHz", pll_freq_khz/1e3);
+    if (pll_freq_khz < 100000) {
+        proto_item_append_text(item, ": %.5g MHz", pll_freq_khz/1e3);
+    } else {
+        proto_item_append_text(item, ": %.6g MHz", pll_freq_khz/1e3);
+    }
 
     return pll_freq_khz;
 }
