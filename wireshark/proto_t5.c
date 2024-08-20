@@ -36,8 +36,7 @@ static const int CTRL_WLEN_OFFSET = 5;
 static const int CTRL_SETUP_DATA_OFFSET = 7;
 
 typedef struct header_info_s {
-    uint16_t frame_counter;
-    uint16_t frame_flags;
+    uint16_t frame_info;
     uint16_t horiz_offset;
     uint16_t vert_offset;
     uint16_t width;
@@ -92,6 +91,16 @@ static const value_string CONTROL_REQS[] = {
     { CTRL_REQ_A7, "Get some flags?" },
     { CTRL_REQ_A8, "Get 128-byte EDID block" },
     { CTRL_REQ_D1, "Firmware reset" },
+    { 0, NULL },
+};
+
+#define PIXEL_FMT_24_BIT 0
+#define PIXEL_FMT_32_BIT 1
+#define PIXEL_FMT_16_BIT 2
+static const value_string PIXEL_FMTS[] = {
+    { PIXEL_FMT_24_BIT, "24-bit" },
+    { PIXEL_FMT_32_BIT, "32-bit" },
+    { PIXEL_FMT_16_BIT, "16-bit" },
     { 0, NULL },
 };
 
@@ -420,8 +429,10 @@ static const field_sizes_t get_video_modes_mode_fields[] = {
 static int HF_T5_BULK_MAGIC = -1;
 static int HF_T5_BULK_HEADER_LEN = -1;
 static int HF_T5_BULK_FRAME_INFO = -1;
-static int HF_T5_BULK_FRAME_FLAGS = -1;
-static int HF_T5_BULK_FRAME_COUNTER = -1;
+static int HF_T5_BULK_FRAME_INFO_UNK = -1;
+static int HF_T5_BULK_FRAME_INFO_PIXEL_FMT = -1;
+static int HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED = -1;
+static int HF_T5_BULK_FRAME_INFO_FRAME_COUNTER = -1;
 static int HF_T5_BULK_H_OFFSET = -1;
 static int HF_T5_BULK_V_OFFSET = -1;
 static int HF_T5_BULK_WIDTH = -1;
@@ -447,11 +458,19 @@ static hf_register_info HF_T5_BULK[] = {
         { "Frame info", "trigger5.bulk.frame_info",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T5_BULK_FRAME_FLAGS,
-        { "Frame flags", "trigger5.bulk.frame_info.flags",
-        FT_UINT16, BASE_HEX, NULL, 0xF000, NULL, HFILL }
+    { &HF_T5_BULK_FRAME_INFO_UNK,
+        { "Unknown flag", "trigger5.bulk.frame_info.unk",
+        FT_BOOLEAN, 16, NULL, 0x8000, NULL, HFILL }
     },
-    { &HF_T5_BULK_FRAME_COUNTER,
+    { &HF_T5_BULK_FRAME_INFO_PIXEL_FMT,
+        { "Pixel format", "trigger5.bulk.frame_info.pixel_fmt",
+        FT_UINT16, BASE_DEC, VALS(PIXEL_FMTS), 0x6000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED,
+        { "Compression enabled", "trigger5.bulk.frame_info.compression_enabled",
+        FT_BOOLEAN, 16, NULL, 0x1000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_FRAME_INFO_FRAME_COUNTER,
         { "Frame counter", "trigger5.bulk.frame_info.counter",
         FT_UINT16, BASE_DEC_HEX, NULL, 0x0FFF, NULL, HFILL }
     },
@@ -582,6 +601,7 @@ static int ETT_T5_CONTROL_REQ_SET_VIDEO_MODE_CUSTOM = -1;
 static int ETT_T5_VIDEO_MODE_PLL_CONFIG = -1;
 static int ETT_T5_VIDEO_MODES = -1;
 static int ETT_T5_VIDEO_MODE_INFO = -1;
+static int ETT_T5_BULK_FRAME_INFO = -1;
 static int * const ETT[] = {
     &ETT_T5,
     &ETT_T5_FIRMWARE_VERSION,
@@ -590,6 +610,7 @@ static int * const ETT[] = {
     &ETT_T5_VIDEO_MODE_PLL_CONFIG,
     &ETT_T5_VIDEO_MODES,
     &ETT_T5_VIDEO_MODE_INFO,
+    &ETT_T5_BULK_FRAME_INFO,
     &ETT_T5_BULK_FRAGMENT,
     &ETT_T5_BULK_FRAGMENTS,
 };
@@ -850,9 +871,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb
 
             /* Create new header info */
             header_info_t * header_info = wmem_new(wmem_file_scope(), header_info_t);
-            uint16_t frame_counter_and_flags = tvb_get_letohs(tvb, 2);
-            header_info->frame_counter = frame_counter_and_flags & 0x0FFF;
-            header_info->frame_flags = frame_counter_and_flags >> 12;
+            header_info->frame_info = tvb_get_letohs(tvb, 2);
             header_info->horiz_offset = tvb_get_letohs(tvb, 4) & 0x1FFF;
             header_info->vert_offset = tvb_get_letohs(tvb, 6) & 0x1FFF;
             header_info->width = tvb_get_letohs(tvb, 8) & 0x1FFF;
@@ -910,8 +929,14 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb
         /* Packet with header */
         proto_tree_add_item(tree, HF_T5_BULK_MAGIC, tvb, 0, 1, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_HEADER_LEN, tvb, 1, 1, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_FRAME_FLAGS, tvb, 2, 2, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_FRAME_COUNTER, tvb, 2, 2, ENC_LITTLE_ENDIAN);
+
+        proto_item * frame_info_item = proto_tree_add_item(tree, HF_T5_BULK_FRAME_INFO, tvb, 2, 2, ENC_NA);
+        proto_tree * frame_info_tree = proto_item_add_subtree(frame_info_item, ETT_T5_BULK_FRAME_INFO);
+        proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_UNK, tvb, 2, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_PIXEL_FMT, tvb, 2, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED, tvb, 2, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_FRAME_COUNTER, tvb, 2, 2, ENC_LITTLE_ENDIAN);
+
         proto_tree_add_item(tree, HF_T5_BULK_H_OFFSET, tvb, 4, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_V_OFFSET, tvb, 6, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_WIDTH, tvb, 8, 2, ENC_LITTLE_ENDIAN);
@@ -937,8 +962,14 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb
         /* Fragment */
         pinfo->fragmented = true;
 
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_FRAME_FLAGS, tvb, 0, 0, header_info->frame_flags << 12));
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_FRAME_COUNTER, tvb, 0, 0, header_info->frame_counter));
+        proto_item * frame_info_item = proto_tree_add_none_format(tree, HF_T5_BULK_FRAME_INFO, tvb, 0, 0, "Frame info");
+        proto_item_set_generated(frame_info_item);
+        proto_tree * frame_info_tree = proto_item_add_subtree(frame_info_item, ETT_T5_BULK_FRAME_INFO);
+        proto_item_set_generated(proto_tree_add_boolean(frame_info_tree, HF_T5_BULK_FRAME_INFO_UNK, tvb, 0, 0, header_info->frame_info));
+        proto_item_set_generated(proto_tree_add_uint(frame_info_tree, HF_T5_BULK_FRAME_INFO_PIXEL_FMT, tvb, 0, 0, header_info->frame_info));
+        proto_item_set_generated(proto_tree_add_boolean(frame_info_tree, HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED, tvb, 0, 0, header_info->frame_info));
+        proto_item_set_generated(proto_tree_add_uint(frame_info_tree, HF_T5_BULK_FRAME_INFO_FRAME_COUNTER, tvb, 0, 0, header_info->frame_info));
+
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_H_OFFSET, tvb, 0, 0, header_info->horiz_offset));
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_V_OFFSET, tvb, 0, 0, header_info->vert_offset));
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_WIDTH, tvb, 0, 0, header_info->width));
