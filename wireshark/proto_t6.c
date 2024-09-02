@@ -1232,9 +1232,9 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
 }
 
 static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
-    if ((urb->endpoint & 0x7F) == 1 && urb->direction) {
+    if (urb->direction) {
         /* BULK 1 IN */
-    } else if ((urb->endpoint & 0x7F) == 2 && !urb->direction) {
+    } else if (!urb->direction) {
         /* BULK 2 OUT */
         conversation_t * conversation = find_or_create_conversation(pinfo);
         bulk_conv_info_t * bulk_conv_info = (bulk_conv_info_t *)conversation_get_proto_data(conversation, PROTO_T6);
@@ -1364,6 +1364,10 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_
 }
 
 static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
+    if (!urb->direction) {
+        return 0;
+    }
+
     /* INTERRUPT IN */
 
     return tvb_captured_length(tvb);
@@ -1377,16 +1381,12 @@ static int dissect_t6(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void 
 
     col_set_str(pinfo->cinfo, COL_PROTOCOL, "Trigger 6");
 
-    switch (urb->endpoint & 0x7F) {
-        case 0:
+    switch (urb->transfer_type) {
+        case URB_CONTROL:
             return handle_control(tvb, pinfo, t6_tree, urb);
-        case 1:
-        case 2:
+        case URB_BULK:
             return handle_bulk(tvb, pinfo, t6_tree, urb);
-        case 3:
-            if (!urb->direction) {
-                return 0;
-            }
+        case URB_INTERRUPT:
             return handle_interrupt(tvb, pinfo, t6_tree, urb);
         default:
             return 0;

@@ -845,7 +845,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
 }
 
 static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb_info_t *urb) {
-    if (!((urb->endpoint & 0x7F) == 1 && !urb->direction)) {
+    if (urb->direction) {
         return 0;
     }
 
@@ -1029,12 +1029,12 @@ static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 static int dissect_t5(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data) {
     urb_info_t * urb = (urb_info_t *)data;
 
-    switch (urb->endpoint & 0x7F) {
-        case 0:
+    switch (urb->transfer_type) {
+        case URB_CONTROL:
             return handle_control(tvb, pinfo, tree, urb);
-        case 1:
+        case URB_BULK:
             return handle_bulk(tvb, pinfo, tree, urb);
-        case 4:
+        case URB_INTERRUPT:
             return handle_interrupt(tvb, pinfo, tree, urb);
         default:
             return 0;
