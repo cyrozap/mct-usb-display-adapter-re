@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-# Copyright (C) 2023  Forest Crossman <cyrozap@gmail.com>
+# Copyright (C) 2023-2024  Forest Crossman <cyrozap@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 CFLAGS := $(shell pkg-config --cflags wireshark) -std=c17 -fPIC -Wall -Wpedantic -Werror -O2
 LDFLAGS := $(shell pkg-config --libs wireshark)
 
-PLUGINS_VERSION = $(shell basename $(shell pkg-config --variable plugindir wireshark))
+PLUGINS_VERSION = 4.2
 PLUGINS_DIRECTORY = $(HOME)/.local/lib/wireshark/plugins/$(PLUGINS_VERSION)/epan
 PLUGIN_WANT_MAJOR = $(word 1,$(subst ., ,$(PLUGINS_VERSION)))
 PLUGIN_WANT_MINOR = $(word 2,$(subst ., ,$(PLUGINS_VERSION)))
