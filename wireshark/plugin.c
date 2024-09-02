@@ -2,7 +2,7 @@
 
 /*
  *  plugin.c - Wireshark dissector for MCT's Trigger 5 and Trigger 6 protocols.
- *  Copyright (C) 2023  Forest Crossman <cyrozap@gmail.com>
+ *  Copyright (C) 2023-2024  Forest Crossman <cyrozap@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include <stdint.h>
 
 #include <epan/proto.h>
+#include <wsutil/plugins.h>
 
 #include "proto_t5.h"
 #include "proto_t6.h"
@@ -48,4 +49,8 @@ static const proto_plugin plugin = {
 
 void plugin_register(void) {
     proto_register_plugin(&plugin);
+}
+
+uint32_t plugin_describe(void) {
+    return WS_PLUGIN_DESC_DISSECTOR;
 }
