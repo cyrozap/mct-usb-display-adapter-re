@@ -2,7 +2,7 @@
 
 /*
  *  proto_t5.c - Wireshark dissector for MCT's Trigger 5 protocol.
- *  Copyright (C) 2023  Forest Crossman <cyrozap@gmail.com>
+ *  Copyright (C) 2023-2024  Forest Crossman <cyrozap@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +18,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 
+#include <epan/conversation.h>
 #include <epan/dissectors/packet-usb.h>
 #include <epan/expert.h>
 #include <epan/packet.h>
@@ -58,9 +60,14 @@ typedef struct bulk_conv_info_s {
     wmem_map_t * fragment_info_by_frame_num;
 } bulk_conv_info_t;
 
+typedef struct static_range_s {
+    unsigned nranges;
+    range_admin_t ranges[1];
+} static_range_t;
+
 static const uint32_t MCT_USB_VID = 0x0711;
 
-static const range_t MCT_USB_PID_RANGE = {
+static const static_range_t MCT_USB_PID_RANGE = {
     .nranges = 1,
     .ranges = {
         { .low = (MCT_USB_VID << 16) | 0x5800, .high = (MCT_USB_VID << 16) | 0x581F },
@@ -641,20 +648,20 @@ static uint8_t bulk_header_checksum_tvb_offset(tvbuff_t *tvb, uint32_t offset, u
     return bulk_header_checksum(buf, len);
 }
 
-static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb_conv_info_t *usb_conv_info) {
-    gboolean in_not_out = usb_conv_info->direction != 0;
-    gboolean setup_not_completion = usb_conv_info->is_setup;
-    uint8_t bRequest = usb_conv_info->usb_trans_info->setup.request;
-    uint16_t wValue = usb_conv_info->usb_trans_info->setup.wValue;
-    uint16_t wIndex = usb_conv_info->usb_trans_info->setup.wIndex;
-    uint16_t wLength = usb_conv_info->usb_trans_info->setup.wLength;
+static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb_info_t *urb) {
+    bool in_not_out = urb->direction != 0;
+    bool setup_not_completion = urb->is_setup;
+    uint8_t bRequest = urb->usb_trans_info->setup.request;
+    uint16_t wValue = urb->usb_trans_info->setup.wValue;
+    uint16_t wIndex = urb->usb_trans_info->setup.wIndex;
+    uint16_t wLength = urb->usb_trans_info->setup.wLength;
 
     if (!in_not_out && !setup_not_completion) {
         /* We don't care about completions for OUT requests */
         return 0;
     }
 
-    if (((usb_conv_info->usb_trans_info->setup.requesttype >> 5) & 0x3) != 2) {
+    if (((urb->usb_trans_info->setup.requesttype >> 5) & 0x3) != 2) {
         /* We only care about vendor requests */
         return 0;
     }
@@ -837,8 +844,8 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
     return tvb_captured_length(tvb);
 }
 
-static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb_conv_info_t *usb_conv_info) {
-    if (!(usb_conv_info->endpoint == 1 && !usb_conv_info->direction)) {
+static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb_info_t *urb) {
+    if (!((urb->endpoint & 0x7F) == 1 && !urb->direction)) {
         return 0;
     }
 
@@ -982,7 +989,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb
 
     if (pinfo->fragmented) {
         /* Fragmented */
-        gboolean more_frags = fragment_info->packet_len_remaining > 0;
+        bool more_frags = fragment_info->packet_len_remaining > 0;
 
         fragment_head * frag_head = fragment_add_check(&T5_REASSEMBLY_TABLE,
             tvb, 0, pinfo, 0, NULL, fragment_info->fragment_offset, tvb_captured_length(tvb), more_frags);
@@ -1009,8 +1016,8 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, usb
     return tvb_captured_length(tvb);
 }
 
-static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
-    if (!usb_conv_info->direction) {
+static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
+    if (!urb->direction) {
         return 0;
     }
 
@@ -1020,15 +1027,15 @@ static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 }
 
 static int dissect_t5(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data) {
-    usb_conv_info_t * usb_conv_info = (usb_conv_info_t *)data;
+    urb_info_t * urb = (urb_info_t *)data;
 
-    switch (usb_conv_info->endpoint) {
+    switch (urb->endpoint & 0x7F) {
         case 0:
-            return handle_control(tvb, pinfo, tree, usb_conv_info);
+            return handle_control(tvb, pinfo, tree, urb);
         case 1:
-            return handle_bulk(tvb, pinfo, tree, usb_conv_info);
+            return handle_bulk(tvb, pinfo, tree, urb);
         case 4:
-            return handle_interrupt(tvb, pinfo, tree, usb_conv_info);
+            return handle_interrupt(tvb, pinfo, tree, urb);
         default:
             return 0;
     };

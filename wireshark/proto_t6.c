@@ -18,8 +18,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 
+#include <epan/conversation.h>
 #include <epan/dissectors/packet-usb.h>
 #include <epan/packet.h>
 #include <epan/proto.h>
@@ -40,7 +42,7 @@ typedef enum {
 } frame_type;
 
 typedef struct selector_info_s {
-    guint32 frame_num;
+    uint32_t frame_num;
     uint32_t session_num;
     uint32_t payload_len;
     uint32_t dest_addr;
@@ -66,7 +68,7 @@ typedef struct bulk_conv_info_s {
 } bulk_conv_info_t;
 
 typedef struct bigger_range_s {
-    guint nranges;
+    unsigned nranges;
     range_admin_t ranges[2];
 } bigger_range_t;
 
@@ -877,7 +879,7 @@ static int * const ETT[] = {
 static void dissect_cursor_upload(proto_tree *tree, tvbuff_t *tvb, packet_info *pinfo, uint16_t cursor_index, uint16_t cursor_data_byte_offset) {
     tvbuff_t * next_tvb = NULL;
 
-    gboolean initial_and_fragmented = false;
+    bool initial_and_fragmented = false;
     if (cursor_data_byte_offset == 0) {
         uint16_t height = tvb_get_letohs(tvb, 4);
         uint16_t pitch = tvb_get_letohs(tvb, 6);
@@ -896,7 +898,7 @@ static void dissect_cursor_upload(proto_tree *tree, tvbuff_t *tvb, packet_info *
          *
          * For now, just assume that if the payload size is not exactly 512 bytes (a full packet) the cursor data is
          * fragmented. */
-        gboolean more_frags = tvb_captured_length(tvb) == 512;
+        bool more_frags = tvb_captured_length(tvb) == 512;
 
         fragment_head * frag_head = fragment_add_check(&T6_CONTROL_CURSOR_UPLOAD_REASSEMBLY_TABLE,
             tvb, 0, pinfo, cursor_index, NULL,
@@ -944,10 +946,10 @@ static double dissect_pll_config(proto_item *item, tvbuff_t *tvb) {
     proto_item * mul2_item = proto_tree_add_item(item_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL, tvb, 5, 1, ENC_NA);
     proto_tree * mul2_tree = proto_item_add_subtree(mul2_item, ETT_T6_VIDEO_MODE_PLL_CONFIG_MUL);
 
-    gboolean x2_en = false;
+    bool x2_en = false;
     proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X2_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x2_en);
 
-    gboolean x4_en = false;
+    bool x4_en = false;
     proto_tree_add_item_ret_boolean(mul2_tree, HF_T6_CONTROL_REQ_VIDEO_MODE_PLL_CONFIG_MUL_X4_EN, tvb, 5, 1, ENC_LITTLE_ENDIAN, &x4_en);
 
     uint32_t mul = 1;
@@ -1017,13 +1019,13 @@ static void dissect_video_mode(proto_tree *tree, tvbuff_t *tvb) {
     proto_item_append_text(video_mode_item, ": %d x %d @ %d Hz (%.5g Hz)", h_res, v_res, refresh_rate_hz_reported, refresh_rate_hz_actual);
 }
 
-static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
-    gboolean in_not_out = usb_conv_info->direction != 0;
-    gboolean setup_not_completion = usb_conv_info->is_setup;
-    uint8_t bRequest = usb_conv_info->usb_trans_info->setup.request;
-    uint16_t wValue = usb_conv_info->usb_trans_info->setup.wValue;
-    uint16_t wIndex = usb_conv_info->usb_trans_info->setup.wIndex;
-    uint16_t wLength = usb_conv_info->usb_trans_info->setup.wLength;
+static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
+    bool in_not_out = urb->direction != 0;
+    bool setup_not_completion = urb->is_setup;
+    uint8_t bRequest = urb->usb_trans_info->setup.request;
+    uint16_t wValue = urb->usb_trans_info->setup.wValue;
+    uint16_t wIndex = urb->usb_trans_info->setup.wIndex;
+    uint16_t wLength = urb->usb_trans_info->setup.wLength;
 
     if (!in_not_out && !setup_not_completion) {
         /* We don't care about completions for OUT requests */
@@ -1229,10 +1231,10 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, u
     return tvb_captured_length(tvb);
 }
 
-static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
-    if (usb_conv_info->endpoint == 1 && usb_conv_info->direction) {
+static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
+    if ((urb->endpoint & 0x7F) == 1 && urb->direction) {
         /* BULK 1 IN */
-    } else if (usb_conv_info->endpoint == 2 && !usb_conv_info->direction) {
+    } else if ((urb->endpoint & 0x7F) == 2 && !urb->direction) {
         /* BULK 2 OUT */
         conversation_t * conversation = find_or_create_conversation(pinfo);
         bulk_conv_info_t * bulk_conv_info = (bulk_conv_info_t *)conversation_get_proto_data(conversation, PROTO_T6);
@@ -1329,7 +1331,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
                 pinfo->fragmented = true;
 
                 uint32_t calc_frag_offset = selector_info->payload_len - frame_info->payload_len_remaining - tvb_reported_length(tvb);
-                gboolean more_frags = frame_info->payload_len_remaining > 0;
+                bool more_frags = frame_info->payload_len_remaining > 0;
 
                 fragment_head * frag_head = fragment_add_check(&T6_REASSEMBLY_TABLE,
                     tvb, 0, pinfo, selector_info->session_num, NULL,
@@ -1361,31 +1363,31 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_
     return tvb_captured_length(tvb);
 }
 
-static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, usb_conv_info_t *usb_conv_info) {
+static int handle_interrupt(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_info_t *urb) {
     /* INTERRUPT IN */
 
     return tvb_captured_length(tvb);
 }
 
 static int dissect_t6(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data) {
-    usb_conv_info_t * usb_conv_info = (usb_conv_info_t *)data;
+    urb_info_t * urb = (urb_info_t *)data;
 
     proto_item * t6_tree_item = proto_tree_add_item(tree, PROTO_T6, tvb, 0, -1, ENC_NA);
     proto_tree * t6_tree = proto_item_add_subtree(t6_tree_item, ETT_T6);
 
     col_set_str(pinfo->cinfo, COL_PROTOCOL, "Trigger 6");
 
-    switch (usb_conv_info->endpoint) {
+    switch (urb->endpoint & 0x7F) {
         case 0:
-            return handle_control(tvb, pinfo, t6_tree, usb_conv_info);
+            return handle_control(tvb, pinfo, t6_tree, urb);
         case 1:
         case 2:
-            return handle_bulk(tvb, pinfo, t6_tree, usb_conv_info);
+            return handle_bulk(tvb, pinfo, t6_tree, urb);
         case 3:
-            if (!usb_conv_info->direction) {
+            if (!urb->direction) {
                 return 0;
             }
-            return handle_interrupt(tvb, pinfo, t6_tree, usb_conv_info);
+            return handle_interrupt(tvb, pinfo, t6_tree, urb);
         default:
             return 0;
     };

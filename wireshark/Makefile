@@ -19,7 +19,7 @@
 CFLAGS := $(shell pkg-config --cflags wireshark) -std=c17 -fPIC -Wall -Wpedantic -Werror -O2
 LDFLAGS := $(shell pkg-config --libs wireshark)
 
-PLUGINS_VERSION = 4.2
+PLUGINS_VERSION = 4.4
 PLUGINS_DIRECTORY = $(HOME)/.local/lib/wireshark/plugins/$(PLUGINS_VERSION)/epan
 PLUGIN_WANT_MAJOR = $(word 1,$(subst ., ,$(PLUGINS_VERSION)))
 PLUGIN_WANT_MINOR = $(word 2,$(subst ., ,$(PLUGINS_VERSION)))
