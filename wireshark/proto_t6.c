@@ -69,7 +69,7 @@ typedef struct bulk_conv_info_s {
 
 typedef struct bigger_range_s {
     unsigned nranges;
-    range_admin_t ranges[2];
+    range_admin_t ranges[4];
 } bigger_range_t;
 
 static const uint32_t MCT_USB_VID = 0x0711;
@@ -79,16 +79,13 @@ static const uint32_t HP_USB_VID = 0x03F0;
 #define USB_VID_PID(vid, pid) ((vid << 16) | pid)
 
 static const bigger_range_t MCT_USB_PID_RANGE = {
-    .nranges = 2,
+    .nranges = 4,
     .ranges = {
         { .low = USB_VID_PID(MCT_USB_VID, 0x5600), .high = USB_VID_PID(MCT_USB_VID, 0x561F) },
         { .low = USB_VID_PID(INSIGNIA_USB_VID, 0x5600), .high = USB_VID_PID(INSIGNIA_USB_VID, 0x561F) },
+        { .low = USB_VID_PID(HP_USB_VID, 0x0182), .high = USB_VID_PID(HP_USB_VID, 0x0182) },
+        { .low = USB_VID_PID(HP_USB_VID, 0x0788), .high = USB_VID_PID(HP_USB_VID, 0x0788) },
     },
-};
-
-static const uint32_t HP_USB_PIDS[] = {
-    0x0182,
-    0x0788,
 };
 
 static const value_string SESSIONS[] = {
@@ -1417,10 +1414,5 @@ void proto_register_trigger6(void) {
 
 void proto_reg_handoff_trigger6(void) {
     dissector_add_uint_range("usb.product", (range_t *)&MCT_USB_PID_RANGE, T6_HANDLE);
-
-    for (size_t i = 0; i < array_length(HP_USB_PIDS); i++) {
-        dissector_add_uint("usb.product", USB_VID_PID(HP_USB_VID, HP_USB_PIDS[i]), T6_HANDLE);
-    }
-
     dissector_add_for_decode_as("usb.device", T6_HANDLE);
 }
