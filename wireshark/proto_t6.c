@@ -2,7 +2,7 @@
 
 /*
  *  proto_t6.c - Wireshark dissector for MCT's Trigger 6 protocol.
- *  Copyright (C) 2023-2024  Forest Crossman <cyrozap@gmail.com>
+ *  Copyright (C) 2023-2025  Forest Crossman <cyrozap@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -76,11 +76,13 @@ static const uint32_t MCT_USB_VID = 0x0711;
 static const uint32_t INSIGNIA_USB_VID = 0x19FF;
 static const uint32_t HP_USB_VID = 0x03F0;
 
+#define USB_VID_PID(vid, pid) ((vid << 16) | pid)
+
 static const bigger_range_t MCT_USB_PID_RANGE = {
     .nranges = 2,
     .ranges = {
-        { .low = (MCT_USB_VID << 16) | 0x5600, .high = (MCT_USB_VID << 16) | 0x561F },
-        { .low = (INSIGNIA_USB_VID << 16) | 0x5600, .high = (INSIGNIA_USB_VID << 16) | 0x561F },
+        { .low = USB_VID_PID(MCT_USB_VID, 0x5600), .high = USB_VID_PID(MCT_USB_VID, 0x561F) },
+        { .low = USB_VID_PID(INSIGNIA_USB_VID, 0x5600), .high = USB_VID_PID(INSIGNIA_USB_VID, 0x561F) },
     },
 };
 
@@ -1417,7 +1419,7 @@ void proto_reg_handoff_trigger6(void) {
     dissector_add_uint_range("usb.product", (range_t *)&MCT_USB_PID_RANGE, T6_HANDLE);
 
     for (size_t i = 0; i < array_length(HP_USB_PIDS); i++) {
-        dissector_add_uint("usb.product", (HP_USB_VID << 16) | HP_USB_PIDS[i], T6_HANDLE);
+        dissector_add_uint("usb.product", USB_VID_PID(HP_USB_VID, HP_USB_PIDS[i]), T6_HANDLE);
     }
 
     dissector_add_for_decode_as("usb.device", T6_HANDLE);
