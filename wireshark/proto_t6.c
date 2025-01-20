@@ -387,7 +387,7 @@ static hf_register_info HF_T6_CONTROL[] = {
         FT_UINT32, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_REFRESH_RATE_HZ,
-        { "Refresh rate (HZ)", "trigger6.control.video_mode.refresh_rate_hz",
+        { "Refresh rate (Hz)", "trigger6.control.video_mode.refresh_rate_hz",
         FT_UINT16, BASE_DEC, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T6_CONTROL_REQ_VIDEO_MODE_LINE_TOTAL_PIXELS,
