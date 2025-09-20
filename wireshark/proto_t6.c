@@ -88,10 +88,13 @@ static const bigger_range_t MCT_USB_PID_RANGE = {
     },
 };
 
+#define SESSION_VIDEO 0
+#define SESSION_AUDIO 3
+#define SESSION_FW_UPDATE 5
 static const value_string SESSIONS[] = {
-    { 0, "Video" },
-    { 3, "Audio" },
-    { 5, "Firmware update" },
+    { SESSION_VIDEO, "Video" },
+    { SESSION_AUDIO, "Audio" },
+    { SESSION_FW_UPDATE, "Firmware update" },
     { 0, NULL },
 };
 
