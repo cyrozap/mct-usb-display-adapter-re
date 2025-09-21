@@ -91,10 +91,12 @@ static const bigger_range_t MCT_USB_PID_RANGE = {
 #define SESSION_VIDEO 0
 #define SESSION_AUDIO 3
 #define SESSION_FW_UPDATE 5
+#define SESSION_DMA 7
 static const value_string SESSIONS[] = {
     { SESSION_VIDEO, "Video" },
     { SESSION_AUDIO, "Audio" },
     { SESSION_FW_UPDATE, "Firmware update" },
+    { SESSION_DMA, "DMA" },
     { 0, NULL },
 };
 
@@ -1262,6 +1264,12 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, urb_
                 selector_info->dest_addr = tvb_get_letohl(tvb, 8);
                 selector_info->frag_len = tvb_get_letohl(tvb, 12);
                 selector_info->frag_offset = tvb_get_letohl(tvb, 16);
+
+                if (selector_info->session_num == SESSION_DMA) {
+                    /* This session uses one or more transfers and is not split into multiple fragments. */
+                    selector_info->frag_len = selector_info->payload_len;
+                    selector_info->frag_offset = 0;
+                }
 
                 /* Create new frame info */
                 frame_info = wmem_new(wmem_file_scope(), frame_info_t);
