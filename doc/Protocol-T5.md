@@ -15,6 +15,7 @@ value, and "0xYY" is the bRequest value.
 
  * 0x40, 0xc3: Set video mode/timings.
    * wValue: Index into the supported video modes array.
+     * Appears to be ignored when sending custom video modes.
    * wLength:
      * 0: Standard video mode.
      * 35: Custom video mode.
@@ -110,6 +111,9 @@ value, and "0xYY" is the bRequest value.
      data that were left in the USB buffer.
  * 0xc0, 0xd1: Firmware reset.
    * wValue: 0x0000, 0x0001, 0x0201
+     * Bit 0 (0x0001) seems to be related to enabling and disabling the bulk transport.
+       * After sending `0x0000` bulk transport starts to fail.
+     * Bit 9 (0x0200) seems to be related to enabling and disabling video output.
    * wLength: 1
 
 
@@ -117,6 +121,8 @@ value, and "0xYY" is the bRequest value.
 
  * Seems to be used exclusively for sequences of display/data transfer
    commands.
+ * Header format looks to be the same as the one used by the [Grain Media GM12U320 driver][gm12u320].
+   * The transport is different--for GM12U320 the T5 protocol is wrapped within the mass storage device protocol.
  * Image data is compressed with an algorithm similar to JPEG.
    * Compressed output shows signs of DCT and blocking artifacts.
    * Blocks are 8x8 pixels.
@@ -131,9 +137,9 @@ value, and "0xYY" is the bRequest value.
      * Upper 4 bits: Packet flags.
        * Bit 0: Compression enabled.
        * Bits 1-2: Bit depth.
-         * 0: 24-bit
-         * 1: 32-bit
-         * 2: 16-bit
+         * 0: 24-bit (RGB24 / RGB888)
+         * 1: 32-bit (BGRA32 / BGRA8888 for cursor image data, untested for frame image data)
+         * 2: 16-bit (RGB565)
    * `<H`: Horizontal pixel offset info.
      * Lower 13 bits: Horizontal pixel offset.
      * Upper 3 bits: Unknown.
@@ -160,3 +166,6 @@ value, and "0xYY" is the bRequest value.
        with the Magic), then negate that sum and take the lowest 8 bits.
    * N bytes: Packet payload.
      * The length and data format of this payload are specified in the header.
+
+
+[gm12u320]: https://github.com/torvalds/linux/blob/28924df2a08f440c73991b83028032c901de2ae4/drivers/gpu/drm/tiny/gm12u320.c
