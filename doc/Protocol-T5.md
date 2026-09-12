@@ -123,11 +123,11 @@ value, and "0xYY" is the bRequest value.
    commands.
  * Header format looks to be the same as the one used by the [Grain Media GM12U320 driver][gm12u320].
    * The transport is different--for GM12U320 the T5 protocol is wrapped within the mass storage device protocol.
- * Image data is compressed with an algorithm similar to JPEG.
-   * Compressed output shows signs of DCT and blocking artifacts.
-   * Blocks are 8x8 pixels.
-   * Probably JPEG with a non-standard data encoding (no quantization or
-     Huffman tables in the transmitted data).
+ * Image data is compressed with a custom compression algorithm.
+   * Huffman-coded DPCM (Differential Pulse-Code Modulation).
+   * 64-pixel groups.
+   * Performed on the 24-bit RGB pixel data.
+   * See [Protocol-T5-Compression.md](Protocol-T5-Compression.md) for more details.
  * Packet format:
    * `B`: Magic number identifying the start of the packet header: 0xfb
    * `B`: Header length, always 20 (0x14).
