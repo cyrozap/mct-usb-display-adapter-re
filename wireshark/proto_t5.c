@@ -665,9 +665,9 @@ static int ETT_T5_VIDEO_MODE_PLL_CONFIG = -1;
 static int ETT_T5_VIDEO_MODES = -1;
 static int ETT_T5_VIDEO_MODE_INFO = -1;
 static int ETT_T5_BULK_FRAME_INFO = -1;
+static int ETT_T5_BULK_PAYLOAD_INFO = -1;
 static int ETT_T5_BULK_OTHER_FLAGS = -1;
 static int ETT_T5_BULK_CURSOR_FLAGS = -1;
-static int ETT_T5_BULK_PAYLOAD_INFO = -1;
 static int * const ETT[] = {
     &ETT_T5,
     &ETT_T5_FIRMWARE_VERSION,
@@ -677,9 +677,9 @@ static int * const ETT[] = {
     &ETT_T5_VIDEO_MODES,
     &ETT_T5_VIDEO_MODE_INFO,
     &ETT_T5_BULK_FRAME_INFO,
+    &ETT_T5_BULK_PAYLOAD_INFO,
     &ETT_T5_BULK_OTHER_FLAGS,
     &ETT_T5_BULK_CURSOR_FLAGS,
-    &ETT_T5_BULK_PAYLOAD_INFO,
     &ETT_T5_BULK_FRAGMENT,
     &ETT_T5_BULK_FRAGMENTS,
 };
