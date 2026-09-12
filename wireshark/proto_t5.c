@@ -888,11 +888,32 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
                         proto_item * video_mode_item = proto_tree_add_item(video_modes_tree, HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE, tvb, offset, 8, ENC_NA);
                         proto_tree * video_mode_tree = proto_item_add_subtree(video_mode_item, ETT_T5_VIDEO_MODE_INFO);
 
+                        uint32_t refresh_rate_hz = 0;
+                        uint32_t pixel_clock_mhz = 0;
+                        uint32_t bpp = 0;
+                        uint32_t width = 0;
+                        uint32_t height = 0;
+
                         int field_offset = 0;
                         for (int j = 0; j < array_length(get_video_modes_mode_fields); j++) {
                             proto_tree_add_item(video_mode_tree, *get_video_modes_mode_fields[j].hf, tvb, offset+field_offset, get_video_modes_mode_fields[j].size, ENC_LITTLE_ENDIAN);
+
+                            if (get_video_modes_mode_fields[j].hf == &HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE_REFRESH_RATE_HZ) {
+                                refresh_rate_hz = tvb_get_uint8(tvb, offset+field_offset);
+                            } else if (get_video_modes_mode_fields[j].hf == &HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE_PIXEL_CLOCK_MHZ) {
+                                pixel_clock_mhz = tvb_get_uint8(tvb, offset+field_offset);
+                            } else if (get_video_modes_mode_fields[j].hf == &HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE_BPP) {
+                                bpp = tvb_get_uint8(tvb, offset+field_offset);
+                            } else if (get_video_modes_mode_fields[j].hf == &HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE_HEIGHT) {
+                                height = tvb_get_letohs(tvb, offset+field_offset);
+                            } else if (get_video_modes_mode_fields[j].hf == &HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE_WIDTH) {
+                                width = tvb_get_letohs(tvb, offset+field_offset);
+                            }
+
                             field_offset += get_video_modes_mode_fields[j].size;
                         }
+
+                        proto_item_append_text(video_mode_item, ": %u x %u @ %u Hz, %u bpp, %u MHz", width, height, refresh_rate_hz, bpp, pixel_clock_mhz);
                     }
                 }
                 break;
