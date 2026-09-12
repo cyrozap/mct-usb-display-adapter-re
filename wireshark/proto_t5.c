@@ -117,6 +117,20 @@ static const value_string COMPRESSION_CODECS[] = {
     { 0, NULL },
 };
 
+#define PAYLOAD_TYPE_NORMAL 0x0
+#define PAYLOAD_TYPE_COMMIT 0x1
+#define PAYLOAD_TYPE_CURSOR_IMAGE 0x3
+#define PAYLOAD_TYPE_ENABLE_CURSOR 0x4
+#define PAYLOAD_TYPE_DISABLE_CURSOR 0x5
+static const value_string PAYLOAD_TYPES[] = {
+    { PAYLOAD_TYPE_NORMAL, "Normal payload" },
+    { PAYLOAD_TYPE_COMMIT, "Commit / flip" },
+    { PAYLOAD_TYPE_CURSOR_IMAGE, "Cursor image / attributes descriptor" },
+    { PAYLOAD_TYPE_ENABLE_CURSOR, "Enable cursor" },
+    { PAYLOAD_TYPE_DISABLE_CURSOR, "Disable cursor" },
+    { 0, NULL },
+};
+
 static const true_false_string tfs_sync_polarity = { "Negative", "Positive" };
 static const true_false_string tfs_cursor_alpha_format = { "Special alpha values", "Normal alpha values" };
 
@@ -452,7 +466,7 @@ static int HF_T5_BULK_V_OFFSET = -1;
 static int HF_T5_BULK_WIDTH = -1;
 static int HF_T5_BULK_HEIGHT = -1;
 static int HF_T5_BULK_PAYLOAD_INFO = -1;
-static int HF_T5_BULK_PAYLOAD_FLAGS = -1;
+static int HF_T5_BULK_PAYLOAD_TYPE = -1;
 static int HF_T5_BULK_PAYLOAD_LEN = -1;
 static int HF_T5_BULK_OTHER_FLAGS = -1;
 static int HF_T5_BULK_OTHER_FLAGS_CODEC = -1;
@@ -514,9 +528,9 @@ static hf_register_info HF_T5_BULK[] = {
         { "Payload info", "trigger5.bulk.payload_info",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
-    { &HF_T5_BULK_PAYLOAD_FLAGS,
-        { "Payload flags", "trigger5.bulk.payload_info.flags",
-        FT_UINT32, BASE_HEX, NULL, 0xF0000000, NULL, HFILL }
+    { &HF_T5_BULK_PAYLOAD_TYPE,
+        { "Payload type", "trigger5.bulk.payload_info.type",
+        FT_UINT32, BASE_HEX, VALS(PAYLOAD_TYPES), 0xF0000000, NULL, HFILL }
     },
     { &HF_T5_BULK_PAYLOAD_LEN,
         { "Payload length", "trigger5.bulk.payload_info.len",
@@ -989,7 +1003,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_tree_add_item(tree, HF_T5_BULK_V_OFFSET, tvb, 6, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_WIDTH, tvb, 8, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_HEIGHT, tvb, 10, 2, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_FLAGS, tvb, 12, 4, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_TYPE, tvb, 12, 4, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 12, 4, ENC_LITTLE_ENDIAN);
 
         proto_item * other_flags_item = proto_tree_add_item(tree, HF_T5_BULK_OTHER_FLAGS, tvb, 16, 1, ENC_LITTLE_ENDIAN);
@@ -1033,7 +1047,7 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_V_OFFSET, tvb, 0, 0, header_info->vert_offset));
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_WIDTH, tvb, 0, 0, header_info->width));
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_HEIGHT, tvb, 0, 0, header_info->height));
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_PAYLOAD_FLAGS, tvb, 0, 0, header_info->payload_flags << 28));
+        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_PAYLOAD_TYPE, tvb, 0, 0, header_info->payload_flags << 28));
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 0, 0, header_info->payload_len));
 
         proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_FRAGMENT, tvb, 0, MIN(fragment_info->fragment_len, tvb_captured_length(tvb)), ENC_NA);
