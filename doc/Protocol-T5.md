@@ -143,25 +143,35 @@ value, and "0xYY" is the bRequest value.
          * 2: 16-bit (RGB565)
    * `<H`: Horizontal pixel offset info.
      * Lower 13 bits: Horizontal pixel offset.
-     * Upper 3 bits: Unknown.
+     * Upper 3 bits: Reserved, always zero.
    * `<H`: Vertical pixel offset info.
      * Lower 13 bits: Vertical pixel offset.
-     * Upper 3 bits: Unknown.
+     * Upper 3 bits: Reserved, always zero.
    * `<H`: Width info.
      * Lower 13 bits: Frame pixel width.
-     * Upper 3 bits: Unknown.
+     * Upper 3 bits: Reserved, always zero.
    * `<H`: Height info.
      * Lower 13 bits: Frame pixel height.
-     * Upper 3 bits: Unknown.
+     * Upper 3 bits: Reserved, always zero.
    * `<I`: Payload info.
      * Lower 28 bits: The length of the payload in bytes.
-     * Upper 4 bits: Flags.
-       * 0x3: Enable cursor.
+     * Upper 4 bits: Payload type.
+       * 0x0: Normal payload.
+       * 0x1: Commit / flip, no payload.
+       * 0x3: Cursor image / attributes descriptor.
+       * 0x4: Enable cursor.
        * 0x5: Disable cursor.
    * `B`: Other flags.
      * Bit 0: Unknown, must be set.
-   * `B`: Unknown.
-   * `B`: Unknown.
+     * Bits 4-6: Compression codec?
+       * 0x7: Huffman-compressed.
+   * `B`: Cursor flags.
+     * Bits 0-3: Cursor index.
+     * Bit 4: Cursor image payload packet?
+     * Bit 5: Cursor alpha format?
+       * 0: Normal alpha values.
+       * 1: Special alpha values.
+   * `B`: Reserved, always zero.
    * `B`: Header checksum.
      * To calculate the checksum, simply sum all the previous bytes (starting
        with the Magic), then negate that sum and take the lowest 8 bits.
