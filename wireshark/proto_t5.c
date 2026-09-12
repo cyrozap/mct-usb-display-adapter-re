@@ -462,9 +462,17 @@ static int HF_T5_BULK_FRAME_INFO_PIXEL_FMT = -1;
 static int HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED = -1;
 static int HF_T5_BULK_FRAME_INFO_FRAME_COUNTER = -1;
 static int HF_T5_BULK_H_OFFSET = -1;
+static int HF_T5_BULK_H_OFFSET_RESERVED = -1;
+static int HF_T5_BULK_H_OFFSET_VALUE = -1;
 static int HF_T5_BULK_V_OFFSET = -1;
+static int HF_T5_BULK_V_OFFSET_RESERVED = -1;
+static int HF_T5_BULK_V_OFFSET_VALUE = -1;
 static int HF_T5_BULK_WIDTH = -1;
+static int HF_T5_BULK_WIDTH_RESERVED = -1;
+static int HF_T5_BULK_WIDTH_VALUE = -1;
 static int HF_T5_BULK_HEIGHT = -1;
+static int HF_T5_BULK_HEIGHT_RESERVED = -1;
+static int HF_T5_BULK_HEIGHT_VALUE = -1;
 static int HF_T5_BULK_PAYLOAD_INFO = -1;
 static int HF_T5_BULK_PAYLOAD_TYPE = -1;
 static int HF_T5_BULK_PAYLOAD_LEN = -1;
@@ -511,18 +519,50 @@ static hf_register_info HF_T5_BULK[] = {
     },
     { &HF_T5_BULK_H_OFFSET,
         { "Horizontal offset", "trigger5.bulk.horizontal_offset",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_H_OFFSET_RESERVED,
+        { "Reserved", "trigger5.bulk.horizontal_offset.reserved",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0xE000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_H_OFFSET_VALUE,
+        { "Horizontal offset", "trigger5.bulk.horizontal_offset.value",
         FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
     },
     { &HF_T5_BULK_V_OFFSET,
         { "Vertical offset", "trigger5.bulk.vertical_offset",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_V_OFFSET_RESERVED,
+        { "Reserved", "trigger5.bulk.vertical_offset.reserved",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0xE000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_V_OFFSET_VALUE,
+        { "Vertical offset", "trigger5.bulk.vertical_offset.value",
         FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
     },
     { &HF_T5_BULK_WIDTH,
         { "Width", "trigger5.bulk.width",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_WIDTH_RESERVED,
+        { "Reserved", "trigger5.bulk.width.reserved",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0xE000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_WIDTH_VALUE,
+        { "Width", "trigger5.bulk.width.value",
         FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
     },
     { &HF_T5_BULK_HEIGHT,
         { "Height", "trigger5.bulk.height",
+        FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_HEIGHT_RESERVED,
+        { "Reserved", "trigger5.bulk.height.reserved",
+        FT_UINT16, BASE_DEC_HEX, NULL, 0xE000, NULL, HFILL }
+    },
+    { &HF_T5_BULK_HEIGHT_VALUE,
+        { "Height", "trigger5.bulk.height.value",
         FT_UINT16, BASE_DEC_HEX, NULL, 0x1FFF, NULL, HFILL }
     },
     { &HF_T5_BULK_PAYLOAD_INFO,
@@ -665,6 +705,10 @@ static int ETT_T5_VIDEO_MODE_PLL_CONFIG = -1;
 static int ETT_T5_VIDEO_MODES = -1;
 static int ETT_T5_VIDEO_MODE_INFO = -1;
 static int ETT_T5_BULK_FRAME_INFO = -1;
+static int ETT_T5_BULK_H_OFFSET = -1;
+static int ETT_T5_BULK_V_OFFSET = -1;
+static int ETT_T5_BULK_WIDTH = -1;
+static int ETT_T5_BULK_HEIGHT = -1;
 static int ETT_T5_BULK_PAYLOAD_INFO = -1;
 static int ETT_T5_BULK_OTHER_FLAGS = -1;
 static int ETT_T5_BULK_CURSOR_FLAGS = -1;
@@ -677,6 +721,10 @@ static int * const ETT[] = {
     &ETT_T5_VIDEO_MODES,
     &ETT_T5_VIDEO_MODE_INFO,
     &ETT_T5_BULK_FRAME_INFO,
+    &ETT_T5_BULK_H_OFFSET,
+    &ETT_T5_BULK_V_OFFSET,
+    &ETT_T5_BULK_WIDTH,
+    &ETT_T5_BULK_HEIGHT,
     &ETT_T5_BULK_PAYLOAD_INFO,
     &ETT_T5_BULK_OTHER_FLAGS,
     &ETT_T5_BULK_CURSOR_FLAGS,
@@ -1034,10 +1082,29 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED, tvb, 2, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_FRAME_COUNTER, tvb, 2, 2, ENC_LITTLE_ENDIAN);
 
-        proto_tree_add_item(tree, HF_T5_BULK_H_OFFSET, tvb, 4, 2, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_V_OFFSET, tvb, 6, 2, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_WIDTH, tvb, 8, 2, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_HEIGHT, tvb, 10, 2, ENC_LITTLE_ENDIAN);
+        proto_item * h_offset_item = proto_tree_add_item(tree, HF_T5_BULK_H_OFFSET, tvb, 4, 2, ENC_NA);
+        proto_tree * h_offset_tree = proto_item_add_subtree(h_offset_item, ETT_T5_BULK_H_OFFSET);
+        proto_tree_add_item(h_offset_tree, HF_T5_BULK_H_OFFSET_RESERVED, tvb, 4, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(h_offset_tree, HF_T5_BULK_H_OFFSET_VALUE, tvb, 4, 2, ENC_LITTLE_ENDIAN);
+        proto_item_append_text(h_offset_item, ": %u", (unsigned)header_info->horiz_offset);
+
+        proto_item * v_offset_item = proto_tree_add_item(tree, HF_T5_BULK_V_OFFSET, tvb, 6, 2, ENC_NA);
+        proto_tree * v_offset_tree = proto_item_add_subtree(v_offset_item, ETT_T5_BULK_V_OFFSET);
+        proto_tree_add_item(v_offset_tree, HF_T5_BULK_V_OFFSET_RESERVED, tvb, 6, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(v_offset_tree, HF_T5_BULK_V_OFFSET_VALUE, tvb, 6, 2, ENC_LITTLE_ENDIAN);
+        proto_item_append_text(v_offset_item, ": %u", (unsigned)header_info->vert_offset);
+
+        proto_item * width_item = proto_tree_add_item(tree, HF_T5_BULK_WIDTH, tvb, 8, 2, ENC_NA);
+        proto_tree * width_tree = proto_item_add_subtree(width_item, ETT_T5_BULK_WIDTH);
+        proto_tree_add_item(width_tree, HF_T5_BULK_WIDTH_RESERVED, tvb, 8, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(width_tree, HF_T5_BULK_WIDTH_VALUE, tvb, 8, 2, ENC_LITTLE_ENDIAN);
+        proto_item_append_text(width_item, ": %u", (unsigned)header_info->width);
+
+        proto_item * height_item = proto_tree_add_item(tree, HF_T5_BULK_HEIGHT, tvb, 10, 2, ENC_NA);
+        proto_tree * height_tree = proto_item_add_subtree(height_item, ETT_T5_BULK_HEIGHT);
+        proto_tree_add_item(height_tree, HF_T5_BULK_HEIGHT_RESERVED, tvb, 10, 2, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(height_tree, HF_T5_BULK_HEIGHT_VALUE, tvb, 10, 2, ENC_LITTLE_ENDIAN);
+        proto_item_append_text(height_item, ": %u", (unsigned)header_info->height);
 
         proto_item * payload_info_item = proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_INFO, tvb, 12, 4, ENC_NA);
         proto_tree * payload_info_tree = proto_item_add_subtree(payload_info_item, ETT_T5_BULK_PAYLOAD_INFO);
@@ -1085,10 +1152,33 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_item_set_generated(proto_tree_add_boolean(frame_info_tree, HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED, tvb, 0, 0, header_info->frame_info));
         proto_item_set_generated(proto_tree_add_uint(frame_info_tree, HF_T5_BULK_FRAME_INFO_FRAME_COUNTER, tvb, 0, 0, header_info->frame_info));
 
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_H_OFFSET, tvb, 0, 0, header_info->horiz_offset));
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_V_OFFSET, tvb, 0, 0, header_info->vert_offset));
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_WIDTH, tvb, 0, 0, header_info->width));
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_HEIGHT, tvb, 0, 0, header_info->height));
+        proto_item * h_offset_item = proto_tree_add_none_format(tree, HF_T5_BULK_H_OFFSET, tvb, 0, 0, "Horizontal offset");
+        proto_item_set_generated(h_offset_item);
+        proto_tree * h_offset_tree = proto_item_add_subtree(h_offset_item, ETT_T5_BULK_H_OFFSET);
+        proto_item_set_generated(proto_tree_add_uint(h_offset_tree, HF_T5_BULK_H_OFFSET_RESERVED, tvb, 0, 0, 0));
+        proto_item_set_generated(proto_tree_add_uint(h_offset_tree, HF_T5_BULK_H_OFFSET_VALUE, tvb, 0, 0, header_info->horiz_offset));
+        proto_item_append_text(h_offset_item, ": %u", (unsigned)header_info->horiz_offset);
+
+        proto_item * v_offset_item = proto_tree_add_none_format(tree, HF_T5_BULK_V_OFFSET, tvb, 0, 0, "Vertical offset");
+        proto_item_set_generated(v_offset_item);
+        proto_tree * v_offset_tree = proto_item_add_subtree(v_offset_item, ETT_T5_BULK_V_OFFSET);
+        proto_item_set_generated(proto_tree_add_uint(v_offset_tree, HF_T5_BULK_V_OFFSET_RESERVED, tvb, 0, 0, 0));
+        proto_item_set_generated(proto_tree_add_uint(v_offset_tree, HF_T5_BULK_V_OFFSET_VALUE, tvb, 0, 0, header_info->vert_offset));
+        proto_item_append_text(v_offset_item, ": %u", (unsigned)header_info->vert_offset);
+
+        proto_item * width_item = proto_tree_add_none_format(tree, HF_T5_BULK_WIDTH, tvb, 0, 0, "Width");
+        proto_item_set_generated(width_item);
+        proto_tree * width_tree = proto_item_add_subtree(width_item, ETT_T5_BULK_WIDTH);
+        proto_item_set_generated(proto_tree_add_uint(width_tree, HF_T5_BULK_WIDTH_RESERVED, tvb, 0, 0, 0));
+        proto_item_set_generated(proto_tree_add_uint(width_tree, HF_T5_BULK_WIDTH_VALUE, tvb, 0, 0, header_info->width));
+        proto_item_append_text(width_item, ": %u", (unsigned)header_info->width);
+
+        proto_item * height_item = proto_tree_add_none_format(tree, HF_T5_BULK_HEIGHT, tvb, 0, 0, "Height");
+        proto_item_set_generated(height_item);
+        proto_tree * height_tree = proto_item_add_subtree(height_item, ETT_T5_BULK_HEIGHT);
+        proto_item_set_generated(proto_tree_add_uint(height_tree, HF_T5_BULK_HEIGHT_RESERVED, tvb, 0, 0, 0));
+        proto_item_set_generated(proto_tree_add_uint(height_tree, HF_T5_BULK_HEIGHT_VALUE, tvb, 0, 0, header_info->height));
+        proto_item_append_text(height_item, ": %u", (unsigned)header_info->height);
 
         proto_item * payload_info_item = proto_tree_add_none_format(tree, HF_T5_BULK_PAYLOAD_INFO, tvb, 0, 0, "Payload info");
         proto_item_set_generated(payload_info_item);
