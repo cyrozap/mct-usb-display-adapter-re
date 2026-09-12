@@ -56,6 +56,9 @@ See [doc/Notes.md](doc/Notes.md).
  * [j5create JUA350][jua350]
    * HDMI output
      * 1080p60
+ * [j5create JUA355][jua355]
+   * HDMI output
+     * 1080p60
 
 
 ### Trigger VI (Trigger 6) devices
@@ -126,6 +129,7 @@ Except where stated otherwise:
 [jua310]: https://en.j5create.com/products/jua310
 [jua311]: https://en.j5create.com/products/jua311
 [jua350]: https://en.j5create.com/products/jua350
+[jua355]: https://en.j5create.com/products/jua355
 [jua365]: https://en.j5create.com/products/jua365
 [jca365]: https://en.j5create.com/products/jca365
 [jca366]: https://en.j5create.com/products/jca366

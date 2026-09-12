@@ -77,6 +77,7 @@ value, and "0xYY" is the bRequest value.
      * Examples:
        * 02010200000410000112000c0c1c (JUA310 - VGA)
        * 02010500090510010112000e030c (JUA350 - HDMI)
+       * 02020200000510010112000f0318 (JUA355 - HDMI)
        * 02020200000510010112000f0318 (USB32HDES - HDMI)
  * 0xc0, 0xa4: Get array of video modes supported by the chip.
    * wLength: 420
