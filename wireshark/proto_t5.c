@@ -291,7 +291,7 @@ static hf_register_info HF_T5_CONTROL[] = {
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE,
-        { "Video mode info", "trigger5.control.get_video_modes.video_mode",
+        { "Video mode", "trigger5.control.get_video_modes.video_mode",
         FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE_REFRESH_RATE_HZ,
@@ -963,7 +963,7 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
                             field_offset += get_video_modes_mode_fields[j].size;
                         }
 
-                        proto_item_append_text(video_mode_item, ": %u x %u @ %u Hz, %u bpp, %u MHz", width, height, refresh_rate_hz, bpp, pixel_clock_mhz);
+                        proto_item_append_text(video_mode_item, " %u: %u x %u @ %u Hz, %u bpp, %u MHz", i, width, height, refresh_rate_hz, bpp, pixel_clock_mhz);
                     }
                 }
                 break;
