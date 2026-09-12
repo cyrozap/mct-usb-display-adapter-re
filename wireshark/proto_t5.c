@@ -667,6 +667,7 @@ static int ETT_T5_VIDEO_MODE_INFO = -1;
 static int ETT_T5_BULK_FRAME_INFO = -1;
 static int ETT_T5_BULK_OTHER_FLAGS = -1;
 static int ETT_T5_BULK_CURSOR_FLAGS = -1;
+static int ETT_T5_BULK_PAYLOAD_INFO = -1;
 static int * const ETT[] = {
     &ETT_T5,
     &ETT_T5_FIRMWARE_VERSION,
@@ -678,6 +679,7 @@ static int * const ETT[] = {
     &ETT_T5_BULK_FRAME_INFO,
     &ETT_T5_BULK_OTHER_FLAGS,
     &ETT_T5_BULK_CURSOR_FLAGS,
+    &ETT_T5_BULK_PAYLOAD_INFO,
     &ETT_T5_BULK_FRAGMENT,
     &ETT_T5_BULK_FRAGMENTS,
 };
@@ -1036,8 +1038,13 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_tree_add_item(tree, HF_T5_BULK_V_OFFSET, tvb, 6, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_WIDTH, tvb, 8, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_HEIGHT, tvb, 10, 2, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_TYPE, tvb, 12, 4, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 12, 4, ENC_LITTLE_ENDIAN);
+
+        proto_item * payload_info_item = proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_INFO, tvb, 12, 4, ENC_NA);
+        proto_tree * payload_info_tree = proto_item_add_subtree(payload_info_item, ETT_T5_BULK_PAYLOAD_INFO);
+        proto_tree_add_item(payload_info_tree, HF_T5_BULK_PAYLOAD_TYPE, tvb, 12, 4, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(payload_info_tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 12, 4, ENC_LITTLE_ENDIAN);
+        proto_item_append_text(payload_info_item, ": %s, %u bytes",
+            val_to_str_const(header_info->payload_flags, PAYLOAD_TYPES, "Unknown"), header_info->payload_len);
 
         proto_item * other_flags_item = proto_tree_add_item(tree, HF_T5_BULK_OTHER_FLAGS, tvb, 16, 1, ENC_LITTLE_ENDIAN);
         proto_tree * other_flags_tree = proto_item_add_subtree(other_flags_item, ETT_T5_BULK_OTHER_FLAGS);
@@ -1082,8 +1089,14 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_V_OFFSET, tvb, 0, 0, header_info->vert_offset));
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_WIDTH, tvb, 0, 0, header_info->width));
         proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_HEIGHT, tvb, 0, 0, header_info->height));
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_PAYLOAD_TYPE, tvb, 0, 0, header_info->payload_flags << 28));
-        proto_item_set_generated(proto_tree_add_uint(tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 0, 0, header_info->payload_len));
+
+        proto_item * payload_info_item = proto_tree_add_none_format(tree, HF_T5_BULK_PAYLOAD_INFO, tvb, 0, 0, "Payload info");
+        proto_item_set_generated(payload_info_item);
+        proto_tree * payload_info_tree = proto_item_add_subtree(payload_info_item, ETT_T5_BULK_PAYLOAD_INFO);
+        proto_item_set_generated(proto_tree_add_uint(payload_info_tree, HF_T5_BULK_PAYLOAD_TYPE, tvb, 0, 0, header_info->payload_flags << 28));
+        proto_item_set_generated(proto_tree_add_uint(payload_info_tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 0, 0, header_info->payload_len));
+        proto_item_append_text(payload_info_item, ": %s, %u bytes",
+            val_to_str_const(header_info->payload_flags, PAYLOAD_TYPES, "Unknown"), header_info->payload_len);
 
         proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_FRAGMENT, tvb, 0, MIN(fragment_info->fragment_len, tvb_captured_length(tvb)), ENC_NA);
     }
