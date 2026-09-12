@@ -63,7 +63,8 @@ value, and "0xYY" is the bRequest value.
    * wValue: X-position, in pixels.
    * wIndex: Y-position, in pixels.
  * 0xc0, 0x91: Keepalive (keep the display output active).
-   * wValue: 0x0002
+   * wValue: Keepalive interval in seconds. Setting this to zero disables the
+     keepalive timer. 0x0002 is the only value that has been observed.
  * 0xc0, 0xa1: Get firmware info?
    * wLength: 512
    * Return value:
