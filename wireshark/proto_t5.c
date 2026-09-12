@@ -111,6 +111,12 @@ static const value_string PIXEL_FMTS[] = {
     { 0, NULL },
 };
 
+#define COMPRESSION_CODEC_HUFFMAN 0x7
+static const value_string COMPRESSION_CODECS[] = {
+    { COMPRESSION_CODEC_HUFFMAN, "Huffman-compressed" },
+    { 0, NULL },
+};
+
 static const true_false_string tfs_sync_polarity = { "Negative", "Positive" };
 static const true_false_string tfs_cursor_alpha_format = { "Special alpha values", "Normal alpha values" };
 
@@ -449,6 +455,8 @@ static int HF_T5_BULK_PAYLOAD_INFO = -1;
 static int HF_T5_BULK_PAYLOAD_FLAGS = -1;
 static int HF_T5_BULK_PAYLOAD_LEN = -1;
 static int HF_T5_BULK_OTHER_FLAGS = -1;
+static int HF_T5_BULK_OTHER_FLAGS_CODEC = -1;
+static int HF_T5_BULK_OTHER_FLAGS_UNK = -1;
 static int HF_T5_BULK_CURSOR_FLAGS = -1;
 static int HF_T5_BULK_CURSOR_FLAGS_INDEX = -1;
 static int HF_T5_BULK_CURSOR_FLAGS_IMAGE = -1;
@@ -517,6 +525,14 @@ static hf_register_info HF_T5_BULK[] = {
     { &HF_T5_BULK_OTHER_FLAGS,
         { "Other flags", "trigger5.bulk.other_flags",
         FT_UINT8, BASE_HEX, NULL, 0x0, NULL, HFILL }
+    },
+    { &HF_T5_BULK_OTHER_FLAGS_CODEC,
+        { "Compression codec", "trigger5.bulk.other_flags.codec",
+        FT_UINT8, BASE_HEX, VALS(COMPRESSION_CODECS), 0x70, NULL, HFILL }
+    },
+    { &HF_T5_BULK_OTHER_FLAGS_UNK,
+        { "Unknown flag, must be set", "trigger5.bulk.other_flags.unk",
+        FT_BOOLEAN, 8, NULL, 0x01, NULL, HFILL }
     },
     { &HF_T5_BULK_CURSOR_FLAGS,
         { "Cursor flags", "trigger5.bulk.cursor_flags",
@@ -630,6 +646,7 @@ static int ETT_T5_VIDEO_MODE_PLL_CONFIG = -1;
 static int ETT_T5_VIDEO_MODES = -1;
 static int ETT_T5_VIDEO_MODE_INFO = -1;
 static int ETT_T5_BULK_FRAME_INFO = -1;
+static int ETT_T5_BULK_OTHER_FLAGS = -1;
 static int ETT_T5_BULK_CURSOR_FLAGS = -1;
 static int * const ETT[] = {
     &ETT_T5,
@@ -640,6 +657,7 @@ static int * const ETT[] = {
     &ETT_T5_VIDEO_MODES,
     &ETT_T5_VIDEO_MODE_INFO,
     &ETT_T5_BULK_FRAME_INFO,
+    &ETT_T5_BULK_OTHER_FLAGS,
     &ETT_T5_BULK_CURSOR_FLAGS,
     &ETT_T5_BULK_FRAGMENT,
     &ETT_T5_BULK_FRAGMENTS,
@@ -973,7 +991,11 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_tree_add_item(tree, HF_T5_BULK_HEIGHT, tvb, 10, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_FLAGS, tvb, 12, 4, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(tree, HF_T5_BULK_PAYLOAD_LEN, tvb, 12, 4, ENC_LITTLE_ENDIAN);
-        proto_tree_add_item(tree, HF_T5_BULK_OTHER_FLAGS, tvb, 16, 1, ENC_LITTLE_ENDIAN);
+
+        proto_item * other_flags_item = proto_tree_add_item(tree, HF_T5_BULK_OTHER_FLAGS, tvb, 16, 1, ENC_LITTLE_ENDIAN);
+        proto_tree * other_flags_tree = proto_item_add_subtree(other_flags_item, ETT_T5_BULK_OTHER_FLAGS);
+        proto_tree_add_item(other_flags_tree, HF_T5_BULK_OTHER_FLAGS_CODEC, tvb, 16, 1, ENC_LITTLE_ENDIAN);
+        proto_tree_add_item(other_flags_tree, HF_T5_BULK_OTHER_FLAGS_UNK, tvb, 16, 1, ENC_LITTLE_ENDIAN);
 
         proto_item * cursor_flags_item = proto_tree_add_item(tree, HF_T5_BULK_CURSOR_FLAGS, tvb, 17, 1, ENC_NA);
         proto_tree * cursor_flags_tree = proto_item_add_subtree(cursor_flags_item, ETT_T5_BULK_CURSOR_FLAGS);
