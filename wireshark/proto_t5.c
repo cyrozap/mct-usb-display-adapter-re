@@ -982,6 +982,19 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
     return tvb_captured_length(tvb);
 }
 
+static void append_frame_info_summary(proto_item *item, uint16_t frame_info) {
+    uint32_t pixel_fmt = (frame_info & 0x6000) >> 13;
+    uint32_t frame_counter = frame_info & 0x0FFF;
+
+    if (frame_info & 0x1000) {
+        proto_item_append_text(item, ": %s, compressed, frame %u",
+            val_to_str_const(pixel_fmt, PIXEL_FMTS, "Unknown"), frame_counter);
+    } else {
+        proto_item_append_text(item, ": %s, frame %u",
+            val_to_str_const(pixel_fmt, PIXEL_FMTS, "Unknown"), frame_counter);
+    }
+}
+
 static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb_info_t *urb) {
     if (urb->direction) {
         return 0;
@@ -1082,6 +1095,8 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED, tvb, 2, 2, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(frame_info_tree, HF_T5_BULK_FRAME_INFO_FRAME_COUNTER, tvb, 2, 2, ENC_LITTLE_ENDIAN);
 
+        append_frame_info_summary(frame_info_item, header_info->frame_info);
+
         proto_item * h_offset_item = proto_tree_add_item(tree, HF_T5_BULK_H_OFFSET, tvb, 4, 2, ENC_NA);
         proto_tree * h_offset_tree = proto_item_add_subtree(h_offset_item, ETT_T5_BULK_H_OFFSET);
         proto_tree_add_item(h_offset_tree, HF_T5_BULK_H_OFFSET_RESERVED, tvb, 4, 2, ENC_LITTLE_ENDIAN);
@@ -1151,6 +1166,8 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_item_set_generated(proto_tree_add_uint(frame_info_tree, HF_T5_BULK_FRAME_INFO_PIXEL_FMT, tvb, 0, 0, header_info->frame_info));
         proto_item_set_generated(proto_tree_add_boolean(frame_info_tree, HF_T5_BULK_FRAME_INFO_COMPRESSION_ENABLED, tvb, 0, 0, header_info->frame_info));
         proto_item_set_generated(proto_tree_add_uint(frame_info_tree, HF_T5_BULK_FRAME_INFO_FRAME_COUNTER, tvb, 0, 0, header_info->frame_info));
+
+        append_frame_info_summary(frame_info_item, header_info->frame_info);
 
         proto_item * h_offset_item = proto_tree_add_none_format(tree, HF_T5_BULK_H_OFFSET, tvb, 0, 0, "Horizontal offset");
         proto_item_set_generated(h_offset_item);
