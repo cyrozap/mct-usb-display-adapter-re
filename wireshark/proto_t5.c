@@ -475,6 +475,7 @@ static int HF_T5_BULK_CURSOR_FLAGS = -1;
 static int HF_T5_BULK_CURSOR_FLAGS_INDEX = -1;
 static int HF_T5_BULK_CURSOR_FLAGS_IMAGE = -1;
 static int HF_T5_BULK_CURSOR_FLAGS_ALPHA_FORMAT = -1;
+static int HF_T5_BULK_RESERVED = -1;
 static int HF_T5_BULK_HEADER_CHECKSUM = -1;
 static int HF_T5_BULK_PAYLOAD_FRAGMENT = -1;
 static int HF_T5_BULK_REASSEMBLED_PAYLOAD = -1;
@@ -563,6 +564,10 @@ static hf_register_info HF_T5_BULK[] = {
     { &HF_T5_BULK_CURSOR_FLAGS_INDEX,
         { "Cursor index", "trigger5.bulk.cursor_flags.index",
         FT_UINT8, BASE_DEC, NULL, 0x0F, NULL, HFILL }
+    },
+    { &HF_T5_BULK_RESERVED,
+        { "Reserved", "trigger5.bulk.reserved",
+        FT_UINT8, BASE_HEX, NULL, 0x0, NULL, HFILL }
     },
     { &HF_T5_BULK_HEADER_CHECKSUM,
         { "Header checksum", "trigger5.bulk.header_checksum",
@@ -1016,6 +1021,8 @@ static int handle_bulk(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, urb
         proto_tree_add_item(cursor_flags_tree, HF_T5_BULK_CURSOR_FLAGS_ALPHA_FORMAT, tvb, 17, 1, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(cursor_flags_tree, HF_T5_BULK_CURSOR_FLAGS_IMAGE, tvb, 17, 1, ENC_LITTLE_ENDIAN);
         proto_tree_add_item(cursor_flags_tree, HF_T5_BULK_CURSOR_FLAGS_INDEX, tvb, 17, 1, ENC_LITTLE_ENDIAN);
+
+        proto_tree_add_item(tree, HF_T5_BULK_RESERVED, tvb, 18, 1, ENC_LITTLE_ENDIAN);
 
         uint32_t header_checksum = 0;
         proto_item * checksum_item = proto_tree_add_item_ret_uint(tree, HF_T5_BULK_HEADER_CHECKSUM, tvb, 19, 1, ENC_LITTLE_ENDIAN, &header_checksum);
