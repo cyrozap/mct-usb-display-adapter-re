@@ -874,17 +874,24 @@ static int handle_control(tvbuff_t *tvb, packet_info *pinfo, proto_tree *ptree, 
                 break;
             case CTRL_REQ_A4:
                 {
-                    proto_tree_add_item(tree, HF_T5_CONTROL_REQ_GET_VIDEO_MODES_COUNT, tvb, 0, 2, ENC_BIG_ENDIAN);
+                    uint32_t mode_count = 0;
+                    proto_tree_add_item_ret_uint(tree, HF_T5_CONTROL_REQ_GET_VIDEO_MODES_COUNT, tvb, 0, 2, ENC_BIG_ENDIAN, &mode_count);
                     proto_item * video_modes_item = proto_tree_add_item(tree, HF_T5_CONTROL_REQ_GET_VIDEO_MODES_DATA, tvb, 4, -1, ENC_NA);
                     proto_tree * video_modes_tree = proto_item_add_subtree(video_modes_item, ETT_T5_VIDEO_MODES);
-                    for (int offset = 4; offset < tvb_reported_length(tvb); offset += 8) {
+                    for (uint32_t i = 0; i < mode_count; i++) {
+                        int offset = 4 + (int)(i * 8);
+                        if (offset + 8 > tvb_reported_length(tvb)) {
+                            /* Ignore any mode entries that are missing from the response. */
+                            break;
+                        }
+
                         proto_item * video_mode_item = proto_tree_add_item(video_modes_tree, HF_T5_CONTROL_REQ_GET_VIDEO_MODES_VIDEO_MODE, tvb, offset, 8, ENC_NA);
                         proto_tree * video_mode_tree = proto_item_add_subtree(video_mode_item, ETT_T5_VIDEO_MODE_INFO);
 
                         int field_offset = 0;
-                        for (int i = 0; i < array_length(get_video_modes_mode_fields); i++) {
-                            proto_tree_add_item(video_mode_tree, *get_video_modes_mode_fields[i].hf, tvb, offset+field_offset, get_video_modes_mode_fields[i].size, ENC_LITTLE_ENDIAN);
-                            field_offset += get_video_modes_mode_fields[i].size;
+                        for (int j = 0; j < array_length(get_video_modes_mode_fields); j++) {
+                            proto_tree_add_item(video_mode_tree, *get_video_modes_mode_fields[j].hf, tvb, offset+field_offset, get_video_modes_mode_fields[j].size, ENC_LITTLE_ENDIAN);
+                            field_offset += get_video_modes_mode_fields[j].size;
                         }
                     }
                 }
