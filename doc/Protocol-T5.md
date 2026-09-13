@@ -105,6 +105,15 @@ value, and "0xYY" is the bRequest value.
        * 02010500090510010112000e030c (JUA350 - HDMI)
        * 02020200000510010112000f0318 (JUA355 - HDMI)
        * 02020200000510010112000f0318 (USB32HDES - HDMI)
+ * 0xc0, 0xa3: Get first 128-byte EDID block on devices with firmware versions
+   2.1.3 and below.
+   * wIndex: 0x1, unknown.
+   * wLength: 512
+   * Return value:
+     * `2B`: Unknown.
+     * `>H`: Number of EDID bytes, up to 128.
+     * `128B`: EDID data.
+     * `4B`: Unknown.
  * 0xc0, 0xa4: Get array of video modes supported by the chip.
    * wLength: 420
    * Return value:
