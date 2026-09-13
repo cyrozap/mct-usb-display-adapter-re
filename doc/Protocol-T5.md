@@ -65,13 +65,30 @@ value, and "0xYY" is the bRequest value.
  * 0xc0, 0x91: Keepalive (keep the display output active).
    * wValue: Keepalive interval in seconds. Setting this to zero disables the
      keepalive timer. 0x0002 is the only value that has been observed.
- * 0xc0, 0xa1: Get firmware info?
+ * 0xc0, 0xa1: Get device info.
    * wLength: 512
    * Return value:
-     * `B`: Version major?
-     * `B`: Version minor?
-     * `B`: Version patch?
-     * `8B`: Unknown.
+     * `B`: Firmware version major?
+     * `B`: Firmware version minor?
+     * `B`: Firmware version patch?
+     * `>H`: Firmware feature level?
+     * `B`: Unknown.
+     * `B`: Unknown. If the low nybble of byte 9 is zero, this value indicates
+       to the driver whether or not to set bit 9 in wValue when sending a reset
+       command to the device.
+       * Eq. 0x20: Reset wValue should be 0x0001.
+       * Not 0x20: Reset wValue should be 0x0201.
+     * `B`: Unknown.
+     * `B`: Unknown.
+     * `B`: Unknown. Indicates to the driver whether to set bit 9 in wValue when
+       sending a reset command to the device, or if byte 6 should indicate
+       whether to set bit 9 in wValue when sending a reset command to the
+       device.
+       * Bits 0-3:
+         * 0x0: Byte 6 indicates what the reset wValue should be.
+         * Non-zero: Reset wValue should be 0x0201.
+       * Bits 4-7: Unknown.
+     * `B`: Unknown.
      * `B`: Year, starting at 2000.
      * `B`: Month.
      * `B`: Day.
