@@ -14,11 +14,19 @@ Commands are in the form of "0xXX, 0xYY", where "0xXX" is the bmRequestType
 value, and "0xYY" is the bRequest value.
 
  * 0x40, 0xc3: Set video mode/timings.
-   * wValue: Index into the supported video modes array.
-     * Appears to be ignored when sending custom video modes.
+   * wValue:
+     * When setting a standard video mode, this value is an index into the
+       supported video modes array.
+     * When setting a custom mode:
+       * For firmware version 2.0.x with feature level <=57, this value is set
+         to zero.
+       * For all newer firmware versions, this is the index into the supported
+         video modes array of the closest matching video mode.
    * wLength:
      * 0: Standard video mode.
      * 35: Custom video mode.
+       * Custom video modes are only supported with newer firmware versions
+         starting with version 2.0.x with feature level 56.
    * `>H`: Vertical resolution.
    * `>H`: Horizontal resolution.
    * `>H`: Line total pixels minus one.
