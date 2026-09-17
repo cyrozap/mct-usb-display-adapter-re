@@ -102,6 +102,14 @@ See [doc/Notes.md](doc/Notes.md).
      * 6.6 inches diagonal
      * 1400 x 720 pixels
 
+### Trigger II (Trigger 2) devices
+ * [j5create JUA230][jua230]
+   * DVI output
+     * 1080p60
+ * [j5create JUA230U][jua230u]
+   * DVI output
+     * 1080p60
+   * Includes DVI to VGA/HDMI adapters
 
 ## License
 
@@ -125,6 +133,8 @@ Except where stated otherwise:
 [usb32hd4]: https://www.startech.com/en-us/audio-video-products/usb32hd4
 [usbc2hd4]: https://www.startech.com/en-us/audio-video-products/usbc2hd4
 [jua214]: https://en.j5create.com/products/jua214
+[jua230]: https://en.j5create.com/products/jua230
+[jua230u]: https://en.j5create.com/products/jua230u
 [jua254]: https://en.j5create.com/products/jua254
 [jua310]: https://en.j5create.com/products/jua310
 [jua311]: https://en.j5create.com/products/jua311
